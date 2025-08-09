@@ -1,111 +1,152 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState, useRef } from "react"
-import Image from "next/image"
-import { useRouter } from "next/navigation"
-import { useRoastume } from "@/lib/store"
-import { ComicCard } from "@/components/comic-card"
+import { ComicCard } from "@/components/comic-card";
+import { Button } from "@/components/ui/button";
+import { useRoastume } from "@/lib/store";
+import { FileText, Image as ImageIcon, Upload } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function UploadPage() {
-  const { addResume } = useRoastume()
-  const router = useRouter()
-  const [name, setName] = useState("")
-  const [blurb, setBlurb] = useState("")
-  const [fileUrl, setFileUrl] = useState<string | undefined>()
-  const [fileType, setFileType] = useState<"image" | "pdf" | undefined>()
-  const fileRef = useRef<HTMLInputElement>(null)
+  const { data: session } = useSession();
+  const { addResume } = useRoastume();
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [blurb, setBlurb] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function onFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0]
-    if (!f) return
-    const url = URL.createObjectURL(f)
-    setFileUrl(url)
-    setFileType(f.type.includes("pdf") ? "pdf" : "image")
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return;
 
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!name.trim() || !fileUrl || !fileType) return
-    const r = addResume({
-      name,
-      avatar: "/cartoon-avatar.png",
-      blurb,
-      fileUrl,
-      fileType,
-    })
-    router.push(`/resume/${r.id}`)
+    setIsSubmitting(true);
+
+    try {
+      // For now, we'll use a placeholder image
+      // In a real app, you'd handle file upload here
+      const resume = addResume({
+        name: name.trim(),
+        blurb: blurb.trim(),
+        avatar: session?.user?.image || "/cartoon-avatar-user.png",
+        fileUrl: "/resume-mock-page.png",
+        fileType: "image",
+      });
+
+      router.push(`/resume/${resume.id}`);
+    } catch (error) {
+      console.error("Error uploading resume:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!session) {
+    return (
+      <div className="grid gap-6">
+        <ComicCard className="p-6 text-center">
+          <h2
+            className="text-2xl font-extrabold tracking-wide mb-4"
+            style={{ textShadow: "1px 1px 0 #2c2c2c" }}
+          >
+            Sign In Required
+          </h2>
+          <p className="text-lg mb-4">
+            You need to sign in to upload your resume for roasting!
+          </p>
+          <Button
+            onClick={() => router.push("/auth/signin")}
+            className="bg-red-500 hover:bg-red-600 text-white font-bold border-[3px] border-[#2c2c2c] shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform px-6 py-3"
+          >
+            Sign In to Upload
+          </Button>
+        </ComicCard>
+      </div>
+    );
   }
 
   return (
-    <div className="grid gap-6">
-      <h2 className="text-3xl font-extrabold tracking-wide" style={{ textShadow: "1px 1px 0 #2c2c2c" }}>
-        Upload Resume
-      </h2>
+    <div className="grid gap-6 max-w-2xl mx-auto">
+      <ComicCard className="p-6">
+        <h2
+          className="text-3xl font-extrabold tracking-wide mb-2"
+          style={{ textShadow: "1px 1px 0 #2c2c2c" }}
+        >
+          Upload Your Resume
+        </h2>
+        <p className="text-lg opacity-80 mb-6">
+          Ready to get roasted? Upload your resume and let the community give
+          you feedback!
+        </p>
 
-      <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-[1.2fr_1fr]">
-        <div className="grid gap-4">
-          <ComicCard className="grid gap-3">
-            <label className="text-sm font-bold tracking-wide" htmlFor="name">
-              Name on Resume
+        <form onSubmit={handleSubmit} className="grid gap-4">
+          <div>
+            <label className="block text-sm font-bold mb-2" htmlFor="name">
+              Your Name
             </label>
             <input
               id="name"
+              type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Tariq"
-              className="rounded-xl border-[3px] border-[#2c2c2c] bg-white p-3 shadow-[3px_3px_0_#2c2c2c] focus:outline-none"
+              placeholder="Enter your name"
+              className="w-full p-3 border-[3px] border-[#2c2c2c] rounded-lg shadow-[3px_3px_0_#2c2c2c] bg-[#F2D5A3] focus:outline-none focus:bg-white transition-colors"
               required
             />
-            <label className="mt-2 text-sm font-bold tracking-wide" htmlFor="blurb">
-              Short Description
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold mb-2" htmlFor="blurb">
+              Description (Optional)
             </label>
             <textarea
               id="blurb"
               value={blurb}
               onChange={(e) => setBlurb(e.target.value)}
-              placeholder="Add context or a fun prompt for roasters..."
-              className="min-h-[90px] rounded-xl border-[3px] border-[#2c2c2c] bg-white p-3 shadow-[3px_3px_0_#2c2c2c] focus:outline-none"
-            />
-          </ComicCard>
-
-          <button
-            type="submit"
-            className="w-fit rounded-full border-[3px] border-[#2c2c2c] bg-[#EBDDBF] px-5 py-3 text-base font-extrabold shadow-[4px_4px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform disabled:opacity-60"
-            disabled={!name || !fileUrl}
-          >
-            Publish
-          </button>
-        </div>
-
-        <ComicCard className="grid gap-4">
-          <div>
-            <label className="block text-sm font-bold tracking-wide">Resume File (PDF or Image)</label>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*,application/pdf"
-              onChange={onFile}
-              className="mt-2 block w-full cursor-pointer rounded-xl border-[3px] border-dashed border-[#2c2c2c] bg-[#F8E9CF] p-3 shadow-[3px_3px_0_#2c2c2c]"
+              placeholder="Tell us about your background, experience, or what kind of feedback you're looking for..."
+              rows={4}
+              className="w-full p-3 border-[3px] border-[#2c2c2c] rounded-lg shadow-[3px_3px_0_#2c2c2c] bg-[#F2D5A3] focus:outline-none focus:bg-white transition-colors resize-none"
             />
           </div>
 
-          {fileUrl ? (
-            <div className="rounded-xl border-[3px] border-[#2c2c2c] bg-white p-2 shadow-[3px_3px_0_#2c2c2c]">
-              {fileType === "image" ? (
-                <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg">
-                  <Image src={fileUrl || "/placeholder.svg"} alt="Resume preview" fill className="object-contain" />
-                </div>
-              ) : (
-                <iframe src={fileUrl} title="PDF preview" className="h-[500px] w-full rounded-lg" />
-              )}
+          <div className="border-[3px] border-dashed border-[#2c2c2c] rounded-lg p-8 text-center bg-[#F8E4C6]">
+            <Upload className="h-12 w-12 mx-auto mb-4 text-[#2c2c2c]" />
+            <p className="text-lg font-bold mb-2">File Upload Coming Soon!</p>
+            <p className="text-sm opacity-80">
+              For now, we&apos;ll use a placeholder resume image. File upload
+              functionality will be added in a future update.
+            </p>
+            <div className="flex justify-center gap-4 mt-4">
+              <div className="flex items-center gap-2 text-sm">
+                <FileText className="h-4 w-4" />
+                PDF Support
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <ImageIcon className="h-4 w-4" />
+                Image Support
+              </div>
             </div>
-          ) : (
-            <p className="text-sm opacity-80">Select a file to see a preview.</p>
-          )}
-        </ComicCard>
-      </form>
+          </div>
+
+          <Button
+            type="submit"
+            disabled={!name.trim() || isSubmitting}
+            className="w-full bg-green-500 hover:bg-green-600 text-white font-bold border-[3px] border-[#2c2c2c] shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform py-3 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? "Uploading..." : "Upload Resume for Roasting! 🔥"}
+          </Button>
+        </form>
+      </ComicCard>
+
+      <ComicCard className="p-4 bg-yellow-100">
+        <h3 className="font-bold mb-2">💡 Tips for Getting Great Feedback:</h3>
+        <ul className="text-sm space-y-1 opacity-80">
+          <li>• Be specific about what kind of feedback you want</li>
+          <li>• Mention your target industry or role</li>
+          <li>• Keep it fun - this is a playful roasting environment!</li>
+          <li>• Remember to give constructive feedback to others too</li>
+        </ul>
+      </ComicCard>
     </div>
-  )
+  );
 }

@@ -1,20 +1,25 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Bangers, Kalam } from "next/font/google"
-import Link from "next/link"
-import { RoastumeProvider } from "@/lib/store"
-import { cn } from "@/lib/utils"
-import { UserCircle2, Upload, Home } from "lucide-react"
+import AuthButton from "@/components/auth-button";
+import { RoastumeProvider } from "@/lib/store";
+import { cn } from "@/lib/utils";
+import { Home, Upload, UserCircle2 } from "lucide-react";
+import type { Metadata } from "next";
+import { Bangers, Kalam } from "next/font/google";
+import Link from "next/link";
+import type React from "react";
 
-const display = Bangers({ subsets: ["latin"], weight: "400" })
-const body = Kalam({ subsets: ["latin"], weight: ["300", "400", "700"] })
+const display = Bangers({ subsets: ["latin"], weight: "400" });
+const body = Kalam({ subsets: ["latin"], weight: ["300", "400", "700"] });
 
 export const metadata: Metadata = {
   title: "Roastume - Roast Your Resume",
   description: "Upload your resume and let the internet roast it (playfully).",
-}
+};
 
-export default function RoastumeLayout({ children }: { children: React.ReactNode }) {
+export default function RoastumeLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <RoastumeProvider>
       <div className="min-h-screen w-full bg-[#97D4D5] text-[#1f1f1f]">
@@ -25,7 +30,7 @@ export default function RoastumeLayout({ children }: { children: React.ReactNode
                 <h1
                   className={cn(
                     display.className,
-                    "text-[clamp(2.25rem,10vw,6rem)] tracking-wide leading-none text-[#F2D5A3]",
+                    "text-[clamp(2.25rem,10vw,6rem)] tracking-wide leading-none text-[#F2D5A3]"
                   )}
                   style={{
                     // Layered teal extrusion + dark outline to match the reference
@@ -47,7 +52,7 @@ export default function RoastumeLayout({ children }: { children: React.ReactNode
                 <p
                   className={cn(
                     display.className,
-                    "mt-2 text-[clamp(1.1rem,3.8vw,2.25rem)] tracking-wider text-[#F2D5A3]",
+                    "mt-2 text-[clamp(1.1rem,3.8vw,2.25rem)] tracking-wider text-[#F2D5A3]"
                   )}
                   style={{
                     textShadow: [
@@ -64,17 +69,20 @@ export default function RoastumeLayout({ children }: { children: React.ReactNode
                 </p>
               </div>
 
-              <Link
-                href="/profile"
-                className={cn(
-                  body.className,
-                  "ml-auto flex items-center gap-2 rounded-full border-[3px] border-[#2c2c2c] bg-[#F2D5A3] px-4 py-2 text-lg font-bold shadow-[3px_3px_0_#2c2c2c] transition-transform hover:-translate-y-0.5",
-                )}
-                aria-label="Profile"
-              >
-                <UserCircle2 className="h-6 w-6" />
-                Profile
-              </Link>
+              <div className="ml-auto flex items-center gap-3">
+                <Link
+                  href="/profile"
+                  className={cn(
+                    body.className,
+                    "flex items-center gap-2 rounded-full border-[3px] border-[#2c2c2c] bg-[#F2D5A3] px-4 py-2 text-lg font-bold shadow-[3px_3px_0_#2c2c2c] transition-transform hover:-translate-y-0.5"
+                  )}
+                  aria-label="Profile"
+                >
+                  <UserCircle2 className="h-6 w-6" />
+                  Profile
+                </Link>
+                <AuthButton />
+              </div>
             </div>
 
             <nav className="mt-4 flex flex-wrap items-center justify-center gap-3">
@@ -82,7 +90,7 @@ export default function RoastumeLayout({ children }: { children: React.ReactNode
                 href="/"
                 className={cn(
                   body.className,
-                  "flex items-center gap-2 rounded-full border-[3px] border-[#2c2c2c] bg-[#EFD7B7] px-4 py-2 text-base font-bold shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform",
+                  "flex items-center gap-2 rounded-full border-[3px] border-[#2c2c2c] bg-[#EFD7B7] px-4 py-2 text-base font-bold shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform"
                 )}
               >
                 <Home className="h-5 w-5" />
@@ -92,7 +100,7 @@ export default function RoastumeLayout({ children }: { children: React.ReactNode
                 href="/upload"
                 className={cn(
                   body.className,
-                  "flex items-center gap-2 rounded-full border-[3px] border-[#2c2c2c] bg-[#F8E4C6] px-4 py-2 text-base font-bold shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform",
+                  "flex items-center gap-2 rounded-full border-[3px] border-[#2c2c2c] bg-[#F8E4C6] px-4 py-2 text-base font-bold shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform"
                 )}
               >
                 <Upload className="h-5 w-5" />
@@ -102,7 +110,9 @@ export default function RoastumeLayout({ children }: { children: React.ReactNode
           </div>
         </header>
 
-        <main className={cn(body.className, "mx-auto max-w-6xl px-4 py-6")}>{children}</main>
+        <main className={cn(body.className, "mx-auto max-w-6xl px-4 py-6")}>
+          {children}
+        </main>
 
         <footer className="mt-8 border-t-4 border-[#2c2c2c] bg-[#97D4D5]">
           <div className="mx-auto max-w-6xl px-4 py-6 text-center text-sm font-semibold">
@@ -111,5 +121,5 @@ export default function RoastumeLayout({ children }: { children: React.ReactNode
         </footer>
       </div>
     </RoastumeProvider>
-  )
+  );
 }
