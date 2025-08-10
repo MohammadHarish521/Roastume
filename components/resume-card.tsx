@@ -2,27 +2,29 @@
 
 import { useRoastume, type Resume } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { Kalam } from "next/font/google";
+import { Bangers, Kalam } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
+import { AiFillFire, AiOutlineComment, AiOutlineLike } from "react-icons/ai";
+import { FaCalendar } from "react-icons/fa";
 import { ComicCard } from "./comic-card";
-import { AiOutlineLike, AiOutlineComment, AiFillFire } from "react-icons/ai";
 
 const body = Kalam({ subsets: ["latin"], weight: ["300", "400", "700"] });
+const display = Bangers({ subsets: ["latin"], weight: "400" });
 
 export function ResumeCard({ resume }: { resume: Resume }) {
   const { like } = useRoastume();
 
   return (
     <ComicCard
-      variant="light"
-      fontStyle="body"
-      shadow="medium"
-      className="grid gap-4"
+      variant="cream"
+      fontStyle="none"
+      shadow="large"
+      className="grid gap-4 border-[4px] border-[#2c2c2c] rounded-2xl p-6 aspect-[16/10] w-full max-w-md"
     >
       {/* Header section with avatar and info */}
-      <div className="flex items-start gap-3">
-        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full border-[3px] border-[#2c2c2c] bg-white shadow-[3px_3px_0_#2c2c2c]">
+      <div className="flex items-start gap-4 mb-2">
+        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border-[4px] border-[#2c2c2c] bg-white">
           <Image
             src={
               resume.avatar ||
@@ -36,40 +38,45 @@ export function ResumeCard({ resume }: { resume: Resume }) {
         <div className="min-w-0 flex-1">
           <h3
             className={cn(
-              body.className,
-              "text-xl sm:text-2xl font-bold tracking-wide text-[#2c2c2c]"
+              display.className,
+              "text-3xl sm:text-4xl font-normal tracking-wide text-[#2c2c2c] mb-2"
             )}
-            style={{ textShadow: "1px 1px 0 rgba(44, 44, 44, 0.1)" }}
+            style={{
+              textShadow: "2px 2px 0 rgba(44, 44, 44, 0.2)",
+              transform: "rotate(-1deg)",
+            }}
           >
             {resume.name}
           </h3>
           <p
             className={cn(
               body.className,
-              "mt-1 line-clamp-2 text-sm leading-relaxed text-[#2c2c2c]/80"
+              "text-base leading-relaxed text-[#2c2c2c] italic"
             )}
           >
             {resume.blurb || "No description provided."}
           </p>
-          <div className="mt-2 flex items-center gap-2 text-xs text-[#2c2c2c]/60">
-            <span>📅 {new Date(resume.createdAt).toLocaleDateString()}</span>
+          <div className="mt-3 flex items-center gap-2 text-sm text-[#2c2c2c]/70">
+            <span className="flex ">
+              <FaCalendar className="mr-1" />{" "}
+              {new Date(resume.createdAt).toLocaleDateString()}
+            </span>
           </div>
         </div>
       </div>
 
       {/* Action buttons */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex items-center gap-2 mt-auto pt-3 border-t-2 border-[#2c2c2c]/20">
         <button
           onClick={() => like(resume.id)}
           className={cn(
-            body.className,
-            "flex items-center gap-2 rounded-full border-[2px] border-[#2c2c2c] bg-green-400 hover:bg-green-500 px-3 py-2 text-sm font-bold shadow-[2px_2px_0_#2c2c2c] hover:-translate-y-0.5 transition-all text-[#2c2c2c]"
+            display.className,
+            "flex items-center gap-2 rounded-full border-[3px] border-[#2c2c2c] bg-green-400 hover:bg-green-500 px-4 py-2 text-sm font-normal shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-1 transition-all text-[#2c2c2c]"
           )}
           aria-label="Like this resume"
         >
           <AiOutlineLike className="h-4 w-4" />
-          Like
-          <span className="ml-1 rounded-full border-[2px] border-[#2c2c2c] bg-white px-2 py-0.5 text-xs font-bold">
+          <span className="rounded-full border-[2px] border-[#2c2c2c] bg-[#F2D5A3] px-2 py-0.5 text-xs font-normal">
             {resume.likes}
           </span>
         </button>
@@ -77,13 +84,12 @@ export function ResumeCard({ resume }: { resume: Resume }) {
         <Link
           href={`/resume/${resume.id}#comments`}
           className={cn(
-            body.className,
-            "flex items-center gap-2 rounded-full border-[2px] border-[#2c2c2c] bg-blue-400 hover:bg-blue-500 px-3 py-2 text-sm font-bold shadow-[2px_2px_0_#2c2c2c] hover:-translate-y-0.5 transition-all text-[#2c2c2c]"
+            display.className,
+            "flex items-center gap-2 rounded-full border-[3px] border-[#2c2c2c] bg-cyan-400 hover:bg-cyan-500 px-4 py-2 text-sm font-normal shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-1 transition-all text-[#2c2c2c]"
           )}
         >
           <AiOutlineComment className="h-4 w-4" />
-          Comment
-          <span className="ml-1 rounded-full border-[2px] border-[#2c2c2c] bg-white px-2 py-0.5 text-xs font-bold">
+          <span className="rounded-full border-[2px] border-[#2c2c2c] bg-[#F2D5A3] px-2 py-0.5 text-xs font-normal">
             {resume.comments.length}
           </span>
         </Link>
@@ -91,13 +97,13 @@ export function ResumeCard({ resume }: { resume: Resume }) {
         <Link
           href={`/resume/${resume.id}`}
           className={cn(
-            body.className,
-            "flex items-center gap-2 rounded-full border-[2px] border-[#2c2c2c] bg-red-400 hover:bg-red-500 px-3 py-2 text-sm font-bold shadow-[2px_2px_0_#2c2c2c] hover:-translate-y-0.5 transition-all text-[#2c2c2c] sm:ml-auto"
+            display.className,
+            "flex items-center gap-2 rounded-full border-[3px] border-[#2c2c2c] bg-orange-400 hover:bg-orange-500 px-4 py-2 text-sm font-normal shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-1 transition-all text-[#2c2c2c] ml-auto"
           )}
           aria-label="Roast this resume"
         >
           <AiFillFire className="h-4 w-4" />
-          Roast It!
+          Roast!
         </Link>
       </div>
     </ComicCard>
