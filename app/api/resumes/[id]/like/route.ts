@@ -53,9 +53,15 @@ export async function POST(
       }
 
       // Decrement likes count
+      const { data: resume } = await supabase
+        .from("resumes")
+        .select("likes_count")
+        .eq("id", params.id)
+        .single();
+
       const { data: updatedResume, error: updateError } = await supabase
         .from("resumes")
-        .update({ likes_count: supabase.sql`likes_count - 1` })
+        .update({ likes_count: Math.max((resume?.likes_count || 0) - 1, 0) })
         .eq("id", params.id)
         .select("likes_count")
         .single();
@@ -85,9 +91,15 @@ export async function POST(
       }
 
       // Increment likes count
+      const { data: resume } = await supabase
+        .from("resumes")
+        .select("likes_count")
+        .eq("id", params.id)
+        .single();
+
       const { data: updatedResume, error: updateError } = await supabase
         .from("resumes")
-        .update({ likes_count: supabase.sql`likes_count + 1` })
+        .update({ likes_count: (resume?.likes_count || 0) + 1 })
         .eq("id", params.id)
         .select("likes_count")
         .single();

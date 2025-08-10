@@ -58,9 +58,15 @@ export async function POST(
     }
 
     // Increment comments count
+    const { data: resume } = await supabase
+      .from("resumes")
+      .select("comments_count")
+      .eq("id", params.id)
+      .single();
+
     const { error: updateError } = await supabase
       .from("resumes")
-      .update({ comments_count: supabase.sql`comments_count + 1` })
+      .update({ comments_count: (resume?.comments_count || 0) + 1 })
       .eq("id", params.id);
 
     if (updateError) {
