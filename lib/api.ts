@@ -18,7 +18,10 @@ export interface ApiComment {
   author: string;
   avatar: string;
   text: string;
+  upvotes: number;
+  downvotes: number;
   createdAt: number;
+  replies?: ApiComment[];
 }
 
 export interface ApiProfile {
@@ -47,6 +50,17 @@ export async function fetchResume(id: string): Promise<ApiResume> {
   }
   const data = await response.json();
   return data.resume;
+}
+
+export async function fetchResumeComments(
+  resumeId: string
+): Promise<ApiComment[]> {
+  const response = await fetch(`/api/resumes/${resumeId}/comments`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch comments");
+  }
+  const data = await response.json();
+  return data.comments;
 }
 
 export async function createResume(resume: {
@@ -79,7 +93,14 @@ export async function likeResume(
   });
 
   if (!response.ok) {
-    throw new Error("Failed to like resume");
+    let message = "Failed to like resume";
+    try {
+      const err = await response.json();
+      if (err?.error) message = err.error;
+    } catch {}
+    const error: any = new Error(message);
+    (error as any).status = response.status;
+    throw error;
   }
 
   return response.json();
@@ -98,11 +119,174 @@ export async function addComment(
   });
 
   if (!response.ok) {
-    throw new Error("Failed to add comment");
+    let message = "Failed to add comment";
+    try {
+      const err = await response.json();
+      if (err?.error) message = err.error;
+    } catch {}
+    const error: any = new Error(message);
+    (error as any).status = response.status;
+    throw error;
   }
 
   const data = await response.json();
   return data.comment;
+}
+
+export async function updateResume(
+  id: string,
+  resume: {
+    name: string;
+    blurb?: string;
+    fileUrl?: string;
+    fileType?: "image" | "pdf";
+  }
+): Promise<ApiResume> {
+  const response = await fetch(`/api/resumes/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(resume),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update resume");
+  }
+
+  const data = await response.json();
+  return data.resume;
+}
+
+export async function deleteResume(id: string): Promise<void> {
+  const response = await fetch(`/api/resumes/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to delete resume");
+  }
+}
+
+export async function fetchMyResumes(): Promise<ApiResume[]> {
+  const response = await fetch("/api/resumes/my");
+  if (!response.ok) {
+    throw new Error("Failed to fetch user resumes");
+  }
+  const data = await response.json();
+  return data.resumes;
+}
+
+// Comment management functions
+export async function updateComment(
+  id: string,
+  text: string
+): Promise<ApiComment> {
+  const response = await fetch(`/api/comments/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ text }),
+  });
+
+  if (!response.ok) {
+    let message = "Failed to update comment";
+    try {
+      const err = await response.json();
+      if (err?.error) message = err.error;
+    } catch {}
+    const error: any = new Error(message);
+    (error as any).status = response.status;
+    throw error;
+  }
+
+  const data = await response.json();
+  return data.comment;
+}
+
+export async function deleteComment(id: string): Promise<void> {
+  const response = await fetch(`/api/comments/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    let message = "Failed to delete comment";
+    try {
+      const err = await response.json();
+      if (err?.error) message = err.error;
+    } catch {}
+    const error: any = new Error(message);
+    (error as any).status = response.status;
+    throw error;
+  }
+}
+
+export async function voteOnComment(
+  id: string,
+  voteType: "upvote" | "downvote"
+): Promise<{
+  voted: boolean;
+  voteType: "upvote" | "downvote" | null;
+  upvotes: number;
+  downvotes: number;
+}> {
+  const response = await fetch(`/api/comments/${id}/vote`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ voteType }),
+  });
+
+  if (!response.ok) {
+    let message = "Failed to vote on comment";
+    try {
+      const err = await response.json();
+      if (err?.error) message = err.error;
+    } catch {}
+    const error: any = new Error(message);
+    (error as any).status = response.status;
+    throw error;
+  }
+
+  return response.json();
+}
+
+export async function addReply(
+  commentId: string,
+  text: string
+): Promise<ApiComment> {
+  const response = await fetch(`/api/comments/${commentId}/replies`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ text }),
+  });
+
+  if (!response.ok) {
+    let message = "Failed to add reply";
+    try {
+      const err = await response.json();
+      if (err?.error) message = err.error;
+    } catch {}
+    const error: any = new Error(message);
+    (error as any).status = response.status;
+    throw error;
+  }
+
+  const data = await response.json();
+  return data.reply;
+}
+
+export async function fetchReplies(commentId: string): Promise<ApiComment[]> {
+  const response = await fetch(`/api/comments/${commentId}/replies`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch replies");
+  }
+  const data = await response.json();
+  return data.replies;
 }
 
 // File upload function

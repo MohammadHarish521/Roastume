@@ -5,15 +5,42 @@ import { cn } from "@/lib/utils";
 import { Bangers, Kalam } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { AiFillFire, AiOutlineComment, AiOutlineLike } from "react-icons/ai";
-import { FaCalendar } from "react-icons/fa";
+import { FaCalendar, FaEdit, FaTrash } from "react-icons/fa";
 import { ComicCard } from "./comic-card";
 
 const body = Kalam({ subsets: ["latin"], weight: ["300", "400", "700"] });
 const display = Bangers({ subsets: ["latin"], weight: "400" });
 
-export function ResumeCard({ resume }: { resume: Resume }) {
-  const { like } = useRoastume();
+interface MyResumeCardProps {
+  resume: Resume;
+  onEdit: (resume: Resume) => void;
+}
+
+export function MyResumeCard({ resume, onEdit }: MyResumeCardProps) {
+  const { like, deleteResume } = useRoastume();
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (
+      !confirm(
+        "Are you sure you want to delete this resume? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      await deleteResume(resume.id);
+    } catch (error) {
+      console.error("Failed to delete resume:", error);
+      alert("Failed to delete resume. Please try again.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <ComicCard
@@ -100,16 +127,41 @@ export function ResumeCard({ resume }: { resume: Resume }) {
           </span>
         </Link>
 
+        <button
+          onClick={() => onEdit(resume)}
+          className={cn(
+            display.className,
+            "flex items-center gap-2 rounded-full border-[3px] border-[#2c2c2c] bg-blue-400 hover:bg-blue-500 px-4 py-2 text-sm font-normal shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-1 transition-all text-[#2c2c2c]"
+          )}
+          aria-label="Edit this resume"
+        >
+          <FaEdit className="h-4 w-4" />
+          Edit
+        </button>
+
+        <button
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className={cn(
+            display.className,
+            "flex items-center gap-2 rounded-full border-[3px] border-[#2c2c2c] bg-red-400 hover:bg-red-500 px-4 py-2 text-sm font-normal shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-1 transition-all text-[#2c2c2c] disabled:opacity-50 disabled:cursor-not-allowed"
+          )}
+          aria-label="Delete this resume"
+        >
+          <FaTrash className="h-4 w-4" />
+          {isDeleting ? "..." : "Delete"}
+        </button>
+
         <Link
           href={`/resume/${resume.id}`}
           className={cn(
             display.className,
             "flex items-center gap-2 rounded-full border-[3px] border-[#2c2c2c] bg-orange-400 hover:bg-orange-500 px-4 py-2 text-sm font-normal shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-1 transition-all text-[#2c2c2c] ml-auto"
           )}
-          aria-label="Roast this resume"
+          aria-label="View this resume"
         >
           <AiFillFire className="h-4 w-4" />
-          Roast!
+          View
         </Link>
       </div>
     </ComicCard>

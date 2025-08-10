@@ -1,9 +1,8 @@
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Create profiles table
 CREATE TABLE profiles (
-  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+  id TEXT PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
   name TEXT,
   avatar_url TEXT,
@@ -14,7 +13,7 @@ CREATE TABLE profiles (
 -- Create resumes table
 CREATE TABLE resumes (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  user_id TEXT REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
   name TEXT NOT NULL,
   blurb TEXT,
   file_url TEXT,
@@ -29,7 +28,7 @@ CREATE TABLE resumes (
 CREATE TABLE comments (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   resume_id UUID REFERENCES resumes(id) ON DELETE CASCADE NOT NULL,
-  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  user_id TEXT REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
   text TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -39,7 +38,7 @@ CREATE TABLE comments (
 CREATE TABLE likes (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   resume_id UUID REFERENCES resumes(id) ON DELETE CASCADE NOT NULL,
-  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  user_id TEXT REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(resume_id, user_id)
 );

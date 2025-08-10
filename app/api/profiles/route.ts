@@ -1,3 +1,4 @@
+import { authOptions } from "@/lib/auth";
 import type { Database } from "@/lib/database.types";
 import { createClient } from "@supabase/supabase-js";
 import { getServerSession } from "next-auth/next";
@@ -11,7 +12,7 @@ const supabase = createClient<Database>(
 // GET /api/profiles - Get current user profile
 export async function GET() {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -67,7 +68,7 @@ export async function GET() {
 // PUT /api/profiles - Update current user profile
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

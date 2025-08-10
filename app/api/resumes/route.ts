@@ -1,3 +1,4 @@
+import { authOptions } from "@/lib/auth";
 import type { Database } from "@/lib/database.types";
 import { createClient } from "@supabase/supabase-js";
 import { getServerSession } from "next-auth/next";
@@ -61,7 +62,7 @@ export async function GET() {
 // POST /api/resumes - Create new resume
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -71,6 +72,23 @@ export async function POST(request: NextRequest) {
 
     if (!name) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
+    }
+
+    // First, ensure the user profile exists
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", session.user.id)
+      .single();
+
+    if (!existingProfile) {
+      // Create profile if it doesn't exist
+      await supabase.from("profiles").insert({
+        id: session.user.id,
+        email: session.user.email || "",
+        name: session.user.name || null,
+        avatar_url: session.user.image || null,
+      });
     }
 
     const { data: resume, error } = await supabase
@@ -84,16 +102,7 @@ export async function POST(request: NextRequest) {
         likes_count: 0,
         comments_count: 0,
       })
-      .select(
-        `
-        *,
-        profiles:user_id (
-          id,
-          name,
-          avatar_url
-        )
-      `
-      )
+      .select("*")
       .single();
 
     if (error) {
@@ -115,10 +124,7 @@ export async function POST(request: NextRequest) {
       fileType: resume.file_type,
       ownerId: resume.user_id,
       createdAt: new Date(resume.created_at).getTime(),
-      avatar:
-        resume.profiles?.avatar_url ||
-        session.user.image ||
-        "/cartoon-avatar-user.png",
+      avatar: session.user.image || "/cartoon-avatar-user.png",
     };
 
     return NextResponse.json({ resume: transformedResume }, { status: 201 });

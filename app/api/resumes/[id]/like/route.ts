@@ -1,3 +1,4 @@
+import { authOptions } from "@/lib/auth";
 import type { Database } from "@/lib/database.types";
 import { createClient } from "@supabase/supabase-js";
 import { getServerSession } from "next-auth/next";
@@ -14,7 +15,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -35,10 +36,8 @@ export async function POST(
       );
     }
 
-    let newLikesCount: number;
-
     if (existingLike) {
-      // Unlike: Remove like and decrement counter
+      // Unlike: Remove like
       const { error: deleteError } = await supabase
         .from("likes")
         .delete()
@@ -52,31 +51,15 @@ export async function POST(
         );
       }
 
-      // Decrement likes count
-      const { data: resume } = await supabase
-        .from("resumes")
-        .select("likes_count")
-        .eq("id", params.id)
-        .single();
+      // Return current count based on likes table
+      const { count } = await supabase
+        .from("likes")
+        .select("id", { count: "exact", head: true })
+        .eq("resume_id", params.id);
 
-      const { data: updatedResume, error: updateError } = await supabase
-        .from("resumes")
-        .update({ likes_count: Math.max((resume?.likes_count || 0) - 1, 0) })
-        .eq("id", params.id)
-        .select("likes_count")
-        .single();
-
-      if (updateError) {
-        console.error("Error updating likes count:", updateError);
-        return NextResponse.json(
-          { error: "Failed to update likes count" },
-          { status: 500 }
-        );
-      }
-
-      newLikesCount = updatedResume.likes_count;
+      return NextResponse.json({ liked: false, likesCount: count || 0 });
     } else {
-      // Like: Add like and increment counter
+      // Like: Add like
       const { error: insertError } = await supabase.from("likes").insert({
         resume_id: params.id,
         user_id: session.user.id,
@@ -90,35 +73,14 @@ export async function POST(
         );
       }
 
-      // Increment likes count
-      const { data: resume } = await supabase
-        .from("resumes")
-        .select("likes_count")
-        .eq("id", params.id)
-        .single();
+      // Return current count based on likes table
+      const { count } = await supabase
+        .from("likes")
+        .select("id", { count: "exact", head: true })
+        .eq("resume_id", params.id);
 
-      const { data: updatedResume, error: updateError } = await supabase
-        .from("resumes")
-        .update({ likes_count: (resume?.likes_count || 0) + 1 })
-        .eq("id", params.id)
-        .select("likes_count")
-        .single();
-
-      if (updateError) {
-        console.error("Error updating likes count:", updateError);
-        return NextResponse.json(
-          { error: "Failed to update likes count" },
-          { status: 500 }
-        );
-      }
-
-      newLikesCount = updatedResume.likes_count;
+      return NextResponse.json({ liked: true, likesCount: count || 0 });
     }
-
-    return NextResponse.json({
-      liked: !existingLike,
-      likesCount: newLikesCount,
-    });
   } catch (error) {
     console.error("API Error:", error);
     return NextResponse.json(

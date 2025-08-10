@@ -30,9 +30,22 @@ CREATE TABLE comments (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   resume_id UUID REFERENCES resumes(id) ON DELETE CASCADE NOT NULL,
   user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  parent_id UUID REFERENCES comments(id) ON DELETE CASCADE NULL, -- For replies
   text TEXT NOT NULL,
+  upvotes_count INTEGER DEFAULT 0,
+  downvotes_count INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create comment_votes table
+CREATE TABLE comment_votes (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  comment_id UUID REFERENCES comments(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  vote_type TEXT CHECK (vote_type IN ('upvote', 'downvote')) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(comment_id, user_id)
 );
 
 -- Create likes table
@@ -51,6 +64,7 @@ INSERT INTO storage.buckets (id, name, public) VALUES ('resumes', 'resumes', tru
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE resumes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE comment_votes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE likes ENABLE ROW LEVEL SECURITY;
 
 -- Profiles policies
@@ -69,6 +83,12 @@ CREATE POLICY "Anyone can view comments" ON comments FOR SELECT USING (true);
 CREATE POLICY "Users can insert own comments" ON comments FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own comments" ON comments FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete own comments" ON comments FOR DELETE USING (auth.uid() = user_id);
+
+-- Comment votes policies
+CREATE POLICY "Anyone can view comment votes" ON comment_votes FOR SELECT USING (true);
+CREATE POLICY "Users can insert own comment votes" ON comment_votes FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own comment votes" ON comment_votes FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own comment votes" ON comment_votes FOR DELETE USING (auth.uid() = user_id);
 
 -- Likes policies
 CREATE POLICY "Anyone can view likes" ON likes FOR SELECT USING (true);
@@ -112,6 +132,41 @@ CREATE TRIGGER likes_count_trigger
 CREATE TRIGGER comments_count_trigger
   AFTER INSERT OR DELETE ON comments
   FOR EACH ROW EXECUTE FUNCTION update_resume_comments_count();
+
+-- Functions to update comment vote counts
+CREATE OR REPLACE FUNCTION update_comment_votes_count()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    IF NEW.vote_type = 'upvote' THEN
+      UPDATE comments SET upvotes_count = upvotes_count + 1 WHERE id = NEW.comment_id;
+    ELSIF NEW.vote_type = 'downvote' THEN
+      UPDATE comments SET downvotes_count = downvotes_count + 1 WHERE id = NEW.comment_id;
+    END IF;
+    RETURN NEW;
+  ELSIF TG_OP = 'UPDATE' THEN
+    -- Handle vote type change
+    IF OLD.vote_type = 'upvote' AND NEW.vote_type = 'downvote' THEN
+      UPDATE comments SET upvotes_count = upvotes_count - 1, downvotes_count = downvotes_count + 1 WHERE id = NEW.comment_id;
+    ELSIF OLD.vote_type = 'downvote' AND NEW.vote_type = 'upvote' THEN
+      UPDATE comments SET downvotes_count = downvotes_count - 1, upvotes_count = upvotes_count + 1 WHERE id = NEW.comment_id;
+    END IF;
+    RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+    IF OLD.vote_type = 'upvote' THEN
+      UPDATE comments SET upvotes_count = upvotes_count - 1 WHERE id = OLD.comment_id;
+    ELSIF OLD.vote_type = 'downvote' THEN
+      UPDATE comments SET downvotes_count = downvotes_count - 1 WHERE id = OLD.comment_id;
+    END IF;
+    RETURN OLD;
+  END IF;
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER comment_votes_count_trigger
+  AFTER INSERT OR UPDATE OR DELETE ON comment_votes
+  FOR EACH ROW EXECUTE FUNCTION update_comment_votes_count();
 
 -- Function to handle new user registration
 CREATE OR REPLACE FUNCTION handle_new_user()

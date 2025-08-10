@@ -2,11 +2,12 @@
 
 import { ComicCard } from "@/components/comic-card";
 import { Button } from "@/components/ui/button";
+import { uploadFile } from "@/lib/api";
 import { useRoastume } from "@/lib/store";
-import { FileText, Image as ImageIcon, Upload } from "lucide-react";
+import { FileText, Image as ImageIcon, Upload, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export default function UploadPage() {
   const { data: session } = useSession();
@@ -15,27 +16,78 @@ export default function UploadPage() {
   const [name, setName] = useState("");
   const [blurb, setBlurb] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "application/pdf",
+      ];
+      if (!allowedTypes.includes(file.type)) {
+        setUploadError(
+          "Invalid file type. Only JPEG, PNG, WebP, and PDF files are allowed."
+        );
+        return;
+      }
+
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setUploadError("File too large. Maximum size is 5MB.");
+        return;
+      }
+
+      setSelectedFile(file);
+      setUploadError(null);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setUploadError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
     setIsSubmitting(true);
+    setUploadError(null);
 
     try {
-      // For now, we'll use a placeholder image
-      // In a real app, you'd handle file upload here
-      const resume = addResume({
+      let fileUrl: string | undefined;
+      let fileType: "image" | "pdf" | undefined;
+
+      // Upload file if selected
+      if (selectedFile) {
+        const uploadResult = await uploadFile(selectedFile);
+        fileUrl = uploadResult.fileUrl;
+        fileType = uploadResult.fileType;
+      }
+
+      const resume = await addResume({
         name: name.trim(),
         blurb: blurb.trim(),
         avatar: session?.user?.image || "/cartoon-avatar-user.png",
-        fileUrl: "/resume-mock-page.png",
-        fileType: "image",
+        fileUrl,
+        fileType,
       });
 
       router.push(`/resume/${resume.id}`);
     } catch (error) {
       console.error("Error uploading resume:", error);
+      setUploadError(
+        error instanceof Error ? error.message : "Failed to upload resume"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -110,23 +162,74 @@ export default function UploadPage() {
           </div>
 
           <div className="border-[3px] border-dashed border-[#2c2c2c] rounded-lg p-8 text-center bg-[#F8E4C6]">
-            <Upload className="h-12 w-12 mx-auto mb-4 text-[#2c2c2c]" />
-            <p className="text-lg font-bold mb-2">File Upload Coming Soon!</p>
-            <p className="text-sm opacity-80">
-              For now, we&apos;ll use a placeholder resume image. File upload
-              functionality will be added in a future update.
-            </p>
-            <div className="flex justify-center gap-4 mt-4">
-              <div className="flex items-center gap-2 text-sm">
-                <FileText className="h-4 w-4" />
-                PDF Support
+            {!selectedFile ? (
+              <>
+                <Upload className="h-12 w-12 mx-auto mb-4 text-[#2c2c2c]" />
+                <p className="text-lg font-bold mb-2">Upload Your Resume</p>
+                <p className="text-sm opacity-80 mb-4">
+                  Choose a PDF or image file (JPEG, PNG, WebP) up to 5MB
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png,.webp"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                  id="file-upload"
+                />
+                <label
+                  htmlFor="file-upload"
+                  className="inline-flex items-center gap-2 rounded-full border-[3px] border-[#2c2c2c] bg-[#EBDDBF] px-4 py-2 font-bold shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform cursor-pointer"
+                >
+                  <Upload className="h-4 w-4" />
+                  Choose File
+                </label>
+                <div className="flex justify-center gap-4 mt-4">
+                  <div className="flex items-center gap-2 text-sm">
+                    <FileText className="h-4 w-4" />
+                    PDF Support
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <ImageIcon className="h-4 w-4" />
+                    Image Support
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-center gap-3">
+                  {selectedFile.type.startsWith("image/") ? (
+                    <ImageIcon className="h-8 w-8 text-[#2c2c2c]" />
+                  ) : (
+                    <FileText className="h-8 w-8 text-[#2c2c2c]" />
+                  )}
+                  <div className="text-left">
+                    <p className="font-bold">{selectedFile.name}</p>
+                    <p className="text-sm opacity-80">
+                      {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRemoveFile}
+                    className="ml-auto p-1 rounded-full hover:bg-red-100 transition-colors"
+                  >
+                    <X className="h-5 w-5 text-red-600" />
+                  </button>
+                </div>
+                <p className="text-sm text-green-600 font-medium">
+                  ✓ File ready to upload
+                </p>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <ImageIcon className="h-4 w-4" />
-                Image Support
-              </div>
-            </div>
+            )}
           </div>
+
+          {uploadError && (
+            <div className="p-3 border-[3px] border-red-500 rounded-lg bg-red-50 text-red-700">
+              <p className="font-bold">Upload Error:</p>
+              <p className="text-sm">{uploadError}</p>
+            </div>
+          )}
 
           <Button
             type="submit"

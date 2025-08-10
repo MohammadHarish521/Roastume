@@ -1,3 +1,4 @@
+import { authOptions } from "@/lib/auth";
 import type { Database } from "@/lib/database.types";
 import { createClient } from "@supabase/supabase-js";
 import { getServerSession } from "next-auth/next";
@@ -11,7 +12,7 @@ const supabase = createClient<Database>(
 // POST /api/upload - Upload file to Supabase Storage
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

@@ -1,15 +1,18 @@
 "use client";
 
 import { ComicCard } from "@/components/comic-card";
-import { ResumeCard } from "@/components/resume-card";
-import { useRoastume } from "@/lib/store";
+import { EditResumeModal } from "@/components/edit-resume-modal";
+import { MyResumeCard } from "@/components/my-resume-card";
+import { useRoastume, type Resume } from "@/lib/store";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
+import { useState } from "react";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const { currentUser, byOwner } = useRoastume();
   const myResumes = byOwner(currentUser.id);
+  const [editingResume, setEditingResume] = useState<Resume | null>(null);
 
   return (
     <div className="grid gap-6">
@@ -81,11 +84,19 @@ export default function ProfilePage() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {myResumes.map((r) => (
-              <ResumeCard key={r.id} resume={r} />
+              <MyResumeCard key={r.id} resume={r} onEdit={setEditingResume} />
             ))}
           </div>
         )}
       </ComicCard>
+
+      {editingResume && (
+        <EditResumeModal
+          resume={editingResume}
+          isOpen={!!editingResume}
+          onClose={() => setEditingResume(null)}
+        />
+      )}
     </div>
   );
 }
