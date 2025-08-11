@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { EnhancedComment } from "./enhanced-comment";
+import { useAuthModal } from "./auth-modal-provider";
 
 export function CommentList({ resumeId }: { resumeId: string }) {
   const { find, addComment, loadComments } = useRoastume();
@@ -13,6 +14,7 @@ export function CommentList({ resumeId }: { resumeId: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingComments, setIsLoadingComments] = useState(true);
   const resume = find(resumeId);
+  const { showSignInModal } = useAuthModal();
 
   if (!resume) return null;
 
@@ -39,8 +41,12 @@ export function CommentList({ resumeId }: { resumeId: string }) {
       setIsSubmitting(true);
       await addComment(resumeId, text.trim());
       setText("");
-    } catch (error) {
-      console.error("Failed to add comment:", error);
+    } catch (error: any) {
+      if (error?.status === 401) {
+        showSignInModal();
+      } else {
+        console.error("Failed to add comment:", error);
+      }
     } finally {
       setIsSubmitting(false);
     }

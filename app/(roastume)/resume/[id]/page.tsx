@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { FaArrowLeft, FaThumbsUp } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import { useAuthModal } from "@/components/auth-modal-provider";
 
 export default function ResumeDetail() {
   const { id } = useParams<{ id: string }>();
@@ -72,7 +74,7 @@ export default function ResumeDetail() {
         </h2>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_0.9fr]">
+      <div className="grid gap-6 lg:grid-cols-[1fr_0.9fr] items-start">
         <ComicCard className="grid gap-3">
           <div className="rounded-lg sm:rounded-xl border-[2px] sm:border-[3px] border-[#2c2c2c] bg-white p-0 sm:p-2 shadow-[2px_2px_0_#2c2c2c] sm:shadow-[3px_3px_0_#2c2c2c] overflow-hidden">
             {resume.fileType === "image" ? (
@@ -88,12 +90,14 @@ export default function ResumeDetail() {
                 />
               </div>
             ) : (
-              <iframe
-                src={pdfUrl ?? resume.fileUrl}
-                title={`${resume.name} resume PDF`}
-                className="block w-full h-[80svh] sm:h-[600px] lg:h-[700px] rounded-none sm:rounded-lg border-0"
-                loading="lazy"
-              />
+              <div className="relative w-full aspect-[85/110] sm:aspect-auto sm:h-[600px] lg:h-[700px] overflow-hidden rounded-none sm:rounded-lg bg-white">
+                <iframe
+                  src={pdfUrl ?? resume.fileUrl}
+                  title={`${resume.name} resume PDF`}
+                  className="absolute inset-0 h-full w-full border-0"
+                  loading="lazy"
+                />
+              </div>
             )}
           </div>
           <p
@@ -103,31 +107,62 @@ export default function ResumeDetail() {
           </p>
         </ComicCard>
 
-        <div className="grid gap-4">
-          <ComicCard>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={async () => {
-                  try {
-                    await like(resume.id);
-                  } catch (error) {
-                    console.error("Failed to like resume:", error);
-                  }
-                }}
-                className="flex items-center gap-2 rounded-full border-[3px] border-[#2c2c2c] bg-[#EBDDBF] px-3 py-2 font-bold shadow-[3px_3px_0_#2c2c2c]"
-              >
-                <FaThumbsUp className="h-5 w-5" />
-                Like
-                <span className="ml-1 rounded-full border-[2px] border-[#2c2c2c] bg-white px-2 py-0.5 text-xs">
-                  {resume.likes}
-                </span>
-              </button>
-            </div>
-          </ComicCard>
+        <div className="grid gap-3">
+          <LikeButton resumeId={resume.id} likes={resume.likes} />
 
-          <CommentList resumeId={resume.id} />
+          <ComicCard className="p-3 sm:p-4">
+            <CommentList resumeId={resume.id} />
+          </ComicCard>
         </div>
       </div>
+    </div>
+  );
+}
+
+function LikeButton({ resumeId, likes }: { resumeId: string; likes: number }) {
+  const { find, like } = useRoastume();
+  const resume = find(resumeId);
+  const [isLiking, setIsLiking] = useState(false);
+  const [isLiked, setIsLiked] = useState<boolean>(false);
+  const { showSignInModal } = useAuthModal();
+
+  useEffect(() => {
+    // naive heuristic: if user likes increased compared to initial render, keep state; otherwise start as not liked
+    setIsLiked(false);
+  }, [resumeId]);
+
+  return (
+    <div className="flex items-center">
+      <button
+        onClick={async () => {
+          if (isLiking) return;
+          try {
+            setIsLiking(true);
+            const liked = await like(resumeId);
+            setIsLiked(liked);
+          } catch (error: any) {
+            if (error?.status === 401) {
+              showSignInModal();
+            } else {
+              console.error("Failed to like resume:", error);
+            }
+          } finally {
+            setIsLiking(false);
+          }
+        }}
+        aria-pressed={isLiked}
+        className={cn(
+          "flex items-center gap-2 rounded-full border-[3px] border-[#2c2c2c] px-3 py-2 font-bold shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform",
+          isLiked ? "bg-green-500" : "bg-green-400"
+        )}
+        disabled={isLiking}
+      >
+        <FaThumbsUp className="h-5 w-5" />
+        {isLiked ? "Liked" : "Like"}
+        <span className="ml-1 rounded-full border-[2px] border-[#2c2c2c] bg-white px-2 py-0.5 text-xs">
+          {resume?.likes ?? likes}
+        </span>
+      </button>
     </div>
   );
 }

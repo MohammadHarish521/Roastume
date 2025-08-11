@@ -36,7 +36,7 @@ export type Store = {
     input: Omit<Resume, "id" | "likes" | "comments" | "createdAt" | "ownerId">
   ) => Promise<Resume>;
   deleteResume: (id: string) => Promise<void>;
-  like: (id: string) => Promise<void>;
+  like: (id: string) => Promise<boolean>;
   addComment: (id: string, text: string) => Promise<void>;
   updateComment: (commentId: string, text: string) => Promise<void>;
   deleteComment: (commentId: string) => Promise<void>;

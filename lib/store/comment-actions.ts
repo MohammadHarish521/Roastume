@@ -76,7 +76,7 @@ export function createCommentActions(
       );
     } catch (err) {
       console.error("Failed to add comment:", err);
-      throw new Error("Failed to add comment");
+      throw err as any;
     }
   };
 
@@ -106,7 +106,7 @@ export function createCommentActions(
       );
     } catch (err) {
       console.error("Failed to update comment:", err);
-      throw new Error("Failed to update comment");
+      throw err as any;
     }
   };
 
@@ -127,7 +127,7 @@ export function createCommentActions(
       );
     } catch (err) {
       console.error("Failed to delete comment:", err);
-      throw new Error("Failed to delete comment");
+      throw err as any;
     }
   };
 
@@ -165,7 +165,7 @@ export function createCommentActions(
       );
     } catch (err) {
       console.error("Failed to vote on comment:", err);
-      throw new Error("Failed to vote on comment");
+      throw err as any;
     }
   };
 
@@ -198,7 +198,7 @@ export function createCommentActions(
       );
     } catch (err) {
       console.error("Failed to add reply:", err);
-      throw new Error("Failed to add reply");
+      throw err as any;
     }
   };
 

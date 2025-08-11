@@ -79,15 +79,16 @@ export function createResumeActions(
     }
   };
 
-  const like = async (id: string) => {
+  const like = async (id: string): Promise<boolean> => {
     try {
       const result = await likeResume(id);
       setResumes((prev) =>
         prev.map((r) => (r.id === id ? { ...r, likes: result.likesCount } : r))
       );
+      return result.liked;
     } catch (err) {
       console.error("Failed to like resume:", err);
-      throw new Error("Failed to like resume");
+      throw err as any;
     }
   };
 
