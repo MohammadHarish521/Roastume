@@ -3,6 +3,7 @@
 import { ComicCard } from "@/components/comic-card";
 import { ResumeCard } from "@/components/resume-card";
 import { SearchBar } from "@/components/search-bar";
+import { WelcomeModal } from "@/components/welcome-modal";
 import { body, display } from "@/lib/fonts";
 import { useRoastume } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -45,7 +46,12 @@ export default function Page() {
     return (
       <div className="grid gap-6">
         <ComicCard className="p-6 text-center border-red-500 bg-red-50">
-          <h2 className="text-xl font-bold text-red-700 mb-2">
+          <h2
+            className={cn(
+              display.className,
+              "text-xl font-bold text-red-700 mb-2"
+            )}
+          >
             Error Loading Resumes
           </h2>
           <p className="text-red-600 mb-4">{error}</p>
@@ -162,12 +168,35 @@ export default function Page() {
           </button>
         </ComicCard>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredResumes.map((r) => (
-            <ResumeCard key={r.id} resume={r} />
-          ))}
+        <div className="grid gap-4">
+          <h3
+            className={cn(
+              display.className,
+              "text-lg sm:text-2xl lg:text-3xl font-normal tracking-wide text-[#F2D5A3] mb-1 sm:mb-2 break-words"
+            )}
+            style={{
+              textShadow: [
+                "4px 4px 0 #2a7e84",
+                "3px 3px 0 #2a7e84",
+                "2px 2px 0 #2a7e84",
+                "-1px -1px 0 #2c2c2c",
+                "1px -1px 0 #2c2c2c",
+                "-1px 1px 0 #2c2c2c",
+                "1px 1px 0 #2c2c2c",
+              ].join(", "),
+            }}
+          >
+            Resumes
+          </h3>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredResumes.map((r) => (
+              <ResumeCard key={r.id} resume={r} />
+            ))}
+          </div>
         </div>
       )}
+
+      <WelcomeModal />
     </div>
   );
 }

@@ -49,7 +49,7 @@ export function ComicCard({
   return (
     <Tag
       className={cn(
-        "rounded-2xl border-[3px] border-[#2c2c2c] p-4 transition-transform hover:-translate-y-0.5 text-[#2c2c2c]",
+        "rounded-2xl border-[3px] border-[#2c2c2c] p-4 transition-transform hover:-translate-y-0.5 text-[#2c2c2c] w-full",
         variantStyles[variant],
         fontStyles[fontStyle],
         shadowStyles[shadow],

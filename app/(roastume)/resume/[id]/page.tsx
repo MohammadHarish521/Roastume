@@ -1,19 +1,25 @@
 "use client";
 
 import { ComicCard } from "@/components/comic-card";
-import { body, display } from "@/lib/fonts";
 import { CommentList } from "@/components/comment-list";
+import { body, display } from "@/lib/fonts";
 import { useRoastume } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { FaArrowLeft, FaThumbsUp } from "react-icons/fa";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
+import { FaArrowLeft, FaThumbsUp } from "react-icons/fa";
 
 export default function ResumeDetail() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { find, like } = useRoastume();
   const resume = find(id);
+  const pdfUrl =
+    resume?.fileType === "pdf" && resume.fileUrl
+      ? `${resume.fileUrl}${
+          resume.fileUrl.includes("#") ? "&" : "#"
+        }view=FitH&zoom=page-width&toolbar=0&navpanes=0&statusbar=0`
+      : undefined;
 
   if (!resume) {
     return (
@@ -21,7 +27,10 @@ export default function ResumeDetail() {
         <p>Resume not found.</p>
         <button
           onClick={() => router.push("/")}
-          className="w-fit rounded-full border-[3px] border-[#2c2c2c] bg-[#EBDDBF] px-4 py-2 font-bold shadow-[3px_3px_0_#2c2c2c]"
+          className={cn(
+            display.className,
+            "w-fit rounded-full border-[3px] border-[#2c2c2c] bg-[#EBDDBF] px-4 py-2 font-bold shadow-[3px_3px_0_#2c2c2c] text-lg"
+          )}
         >
           Back Home
         </button>
@@ -34,7 +43,10 @@ export default function ResumeDetail() {
       <div className="flex items-center gap-3">
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 rounded-full border-[3px] border-[#2c2c2c] bg-[#EBDDBF] px-3 py-2 font-bold shadow-[3px_3px_0_#2c2c2c]"
+          className={cn(
+            display.className,
+            "flex items-center gap-2 rounded-full border-[3px] border-[#2c2c2c] bg-[#EBDDBF] px-3 py-2 font-bold shadow-[3px_3px_0_#2c2c2c] text-lg"
+          )}
           aria-label="Back"
         >
           <FaArrowLeft className="h-5 w-5" /> Back
@@ -42,9 +54,19 @@ export default function ResumeDetail() {
         <h2
           className={cn(
             display.className,
-            "ml-2 text-3xl font-extrabold tracking-wide"
+            "ml-2 text-3xl font-extrabold tracking-wide text-[#F2D5A3]"
           )}
-          style={{ textShadow: "1px 1px 0 #2c2c2c" }}
+          style={{
+            textShadow: [
+              "4px 4px 0 #2a7e84",
+              "3px 3px 0 #2a7e84",
+              "2px 2px 0 #2a7e84",
+              "-1px -1px 0 #2c2c2c",
+              "1px -1px 0 #2c2c2c",
+              "-1px 1px 0 #2c2c2c",
+              "1px 1px 0 #2c2c2c",
+            ].join(", "),
+          }}
         >
           {resume.name}
         </h2>
@@ -52,7 +74,7 @@ export default function ResumeDetail() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_0.9fr]">
         <ComicCard className="grid gap-3">
-          <div className="rounded-xl border-[3px] border-[#2c2c2c] bg-white p-2 shadow-[3px_3px_0_#2c2c2c]">
+          <div className="rounded-lg sm:rounded-xl border-[2px] sm:border-[3px] border-[#2c2c2c] bg-white p-0 sm:p-2 shadow-[2px_2px_0_#2c2c2c] sm:shadow-[3px_3px_0_#2c2c2c] overflow-hidden">
             {resume.fileType === "image" ? (
               <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg bg-white">
                 <Image
@@ -67,13 +89,16 @@ export default function ResumeDetail() {
               </div>
             ) : (
               <iframe
-                src={resume.fileUrl}
+                src={pdfUrl ?? resume.fileUrl}
                 title={`${resume.name} resume PDF`}
-                className="h-[700px] w-full rounded-lg"
+                className="block w-full h-[80svh] sm:h-[600px] lg:h-[700px] rounded-none sm:rounded-lg border-0"
+                loading="lazy"
               />
             )}
           </div>
-          <p className={cn(body.className, "text-sm leading-snug")}>
+          <p
+            className={cn(body.className, "text-sm leading-snug px-2 sm:px-0")}
+          >
             {resume.blurb}
           </p>
         </ComicCard>

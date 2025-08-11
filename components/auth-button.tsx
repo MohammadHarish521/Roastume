@@ -1,7 +1,6 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { body } from "@/lib/fonts";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,11 +8,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { body, display } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
+import { signOut, useSession } from "next-auth/react";
+import { useAuthModal } from "./auth-modal-provider";
 
 export default function AuthButton() {
   const { data: session, status } = useSession();
+  const { showSignInModal } = useAuthModal();
 
   if (status === "loading") {
     return (
@@ -58,7 +60,7 @@ export default function AuthButton() {
               {session.user?.name && (
                 <p
                   className={cn(
-                    body.className,
+                    display.className,
                     "font-bold text-[#2c2c2c] text-sm"
                   )}
                 >
@@ -90,8 +92,11 @@ export default function AuthButton() {
 
   return (
     <Button
-      onClick={() => signIn()}
-      className="bg-red-500 hover:bg-red-600 text-white font-bold border-[3px] border-[#2c2c2c] shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform px-4 py-2 rounded-full"
+      onClick={showSignInModal}
+      className={cn(
+        display.className,
+        "bg-red-400 hover:bg-red-500 text-black font-bold border-[3px] border-[#2c2c2c] shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform px-4 py-2 rounded-full"
+      )}
     >
       Sign In
     </Button>

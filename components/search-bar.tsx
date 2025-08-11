@@ -30,7 +30,7 @@ export function SearchBar({
   };
 
   return (
-    <div className={cn("relative w-full max-w-md", className)}>
+    <div className={cn("relative w-full", className)}>
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#2c2c2c] w-5 h-5" />
         <input
@@ -41,11 +41,11 @@ export function SearchBar({
           className={cn(
             body.className,
             "w-full pl-10 pr-10 py-3 rounded-full",
-            "border-[3px] border-[#2c2c2c] bg-white",
+            "border-[3px] border-[#2c2c2c] bg-green-400",
             "shadow-[3px_3px_0_#2c2c2c]",
             "focus:outline-none focus:shadow-[4px_4px_0_#2c2c2c]",
             "focus:-translate-y-0.5 transition-all duration-200",
-            "placeholder:text-gray-500 text-[#2c2c2c] font-medium"
+            "placeholder:text-gray-600 text-[#2c2c2c] font-medium"
           )}
         />
         {query && (

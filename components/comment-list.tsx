@@ -51,11 +51,21 @@ export function CommentList({ resumeId }: { resumeId: string }) {
       <h3
         className={cn(
           display.className,
-          "text-2xl font-extrabold tracking-wide"
+          "ml-2 text-3xl font-extrabold tracking-wide text-[#F2D5A3]"
         )}
-        style={{ textShadow: "1px 1px 0 #2c2c2c" }}
+        style={{
+          textShadow: [
+            "4px 4px 0 #2a7e84",
+            "3px 3px 0 #2a7e84",
+            "2px 2px 0 #2a7e84",
+            "-1px -1px 0 #2c2c2c",
+            "1px -1px 0 #2c2c2c",
+            "-1px 1px 0 #2c2c2c",
+            "1px 1px 0 #2c2c2c",
+          ].join(", "),
+        }}
       >
-        Comments ({Math.max(resume.comments.length, resume.commentsCount ?? 0)})
+        Comments
       </h3>
 
       <form onSubmit={onSubmit} className="flex items-start gap-3">
