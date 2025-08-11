@@ -9,6 +9,11 @@ export const metadata: Metadata = {
   title: "Roastume",
   description: "A platform for roasting resumes.",
   generator: "Roastume",
+  icons: {
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
