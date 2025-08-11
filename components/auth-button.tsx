@@ -80,10 +80,13 @@ export default function AuthButton() {
             </div>
           </div>
           <DropdownMenuItem
-            className="cursor-pointer text-white bg-red-500 hover:bg-red-600 font-bold mx-2 mb-2 rounded border-[2px] border-[#2c2c2c] shadow-[2px_2px_0_#2c2c2c] hover:-translate-y-0.5 transition-all"
+            className={cn(
+              display.className,
+              "cursor-pointer text-white bg-red-400 hover:bg-red-500 font-bold mx-2 mb-2 rounded border-[2px] border-[#2c2c2c] shadow-[2px_2px_0_#2c2c2c] hover:-translate-y-0.5 transition-all"
+            )}
             onClick={() => signOut()}
           >
-            🚪 Sign out
+            Sign out
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -95,7 +98,7 @@ export default function AuthButton() {
       onClick={showSignInModal}
       className={cn(
         display.className,
-        "bg-red-400 hover:bg-red-500 text-black font-bold border-[3px] border-[#2c2c2c] shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform px-4 py-2 rounded-full"
+        "bg-green-400 hover:bg-green-500 text-black font-bold border-[3px] border-[#2c2c2c] shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform px-4 py-2 rounded-full"
       )}
     >
       Sign In

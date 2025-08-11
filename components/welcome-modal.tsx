@@ -56,7 +56,7 @@ export function WelcomeModal() {
           </h1>
           <button
             onClick={() => setIsOpen(false)}
-            className="p-2 rounded-full border-[2px] border-[#2c2c2c] bg-red-400 hover:bg-red-500 text-[#2c2c2c] shadow-[2px_2px_0_#2c2c2c] hover:-translate-y-0.5 transition-all"
+            className="p-2 rounded-full border-[2px] border-[#2c2c2c] bg-green-400 hover:bg-green-500 text-[#2c2c2c] shadow-[2px_2px_0_#2c2c2c] hover:-translate-y-0.5 transition-all"
             aria-label="Close modal"
           >
             <X className="w-4 h-4" />
