@@ -12,7 +12,7 @@ const supabase = createClient<Database>(
 // POST /api/comments/[id]/vote - Vote on comment (upvote/downvote)
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -20,7 +20,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { voteType } = body; // 'upvote' or 'downvote'
 
@@ -73,41 +73,39 @@ export async function POST(
     let result: { voted: boolean; voteType: "upvote" | "downvote" | null };
 
     if (!votesSupported) {
-      // Fallback: increment counters without per-user tracking
-      const { data: current, error: readErr } = await supabase
+      // Fallback: increment counters without per-user tracking; handle missing count columns
+      const readCounts = await supabase
         .from("comments")
         .select("upvotes_count, downvotes_count")
         .eq("id", id)
         .single();
 
-      if (readErr) {
-        console.error("Error reading counts in fallback:", readErr);
-        return NextResponse.json(
-          { error: "Failed to update vote" },
-          { status: 500 }
-        );
-      }
+      const missingCountColumns = readCounts.error?.code === "42703";
+      const currentUp = missingCountColumns
+        ? 0
+        : (readCounts.data as any)?.upvotes_count ?? 0;
+      const currentDown = missingCountColumns
+        ? 0
+        : (readCounts.data as any)?.downvotes_count ?? 0;
 
-      const nextUp =
-        voteType === "upvote"
-          ? (current.upvotes_count || 0) + 1
-          : current.upvotes_count || 0;
-      const nextDown =
-        voteType === "downvote"
-          ? (current.downvotes_count || 0) + 1
-          : current.downvotes_count || 0;
+      const nextUp = voteType === "upvote" ? currentUp + 1 : currentUp;
+      const nextDown = voteType === "downvote" ? currentDown + 1 : currentDown;
 
-      const { error: writeErr } = await supabase
-        .from("comments")
-        .update({ upvotes_count: nextUp, downvotes_count: nextDown })
-        .eq("id", id);
-
-      if (writeErr) {
-        console.error("Error updating counts in fallback:", writeErr);
-        return NextResponse.json(
-          { error: "Failed to update vote" },
-          { status: 500 }
-        );
+      if (!missingCountColumns && readCounts.data) {
+        const writeAttempt = await supabase
+          .from("comments")
+          .update({ upvotes_count: nextUp, downvotes_count: nextDown } as any)
+          .eq("id", id);
+        if (writeAttempt.error && writeAttempt.error.code !== "42703") {
+          console.error(
+            "Error updating counts in fallback:",
+            writeAttempt.error
+          );
+          return NextResponse.json(
+            { error: "Failed to update vote" },
+            { status: 500 }
+          );
+        }
       }
 
       return NextResponse.json({
@@ -174,14 +172,34 @@ export async function POST(
     }
 
     // Get updated vote counts
-    const { data: updatedComment, error: countError } = await supabase
+    const updatedCounts = await supabase
       .from("comments")
       .select("upvotes_count, downvotes_count")
       .eq("id", id)
       .single();
 
-    if (countError) {
-      console.error("Error getting updated counts:", countError);
+    if (updatedCounts.error?.code === "42703") {
+      // Fallback: compute counts from comment_votes table
+      const up = await supabase
+        .from("comment_votes")
+        .select("id", { count: "exact", head: true })
+        .eq("comment_id", id)
+        .eq("vote_type", "upvote");
+      const down = await supabase
+        .from("comment_votes")
+        .select("id", { count: "exact", head: true })
+        .eq("comment_id", id)
+        .eq("vote_type", "downvote");
+
+      return NextResponse.json({
+        ...result,
+        upvotes: up.count ?? 0,
+        downvotes: down.count ?? 0,
+      });
+    }
+
+    if (updatedCounts.error) {
+      console.error("Error getting updated counts:", updatedCounts.error);
       return NextResponse.json(
         { error: "Failed to get updated counts" },
         { status: 500 }
@@ -190,8 +208,8 @@ export async function POST(
 
     return NextResponse.json({
       ...result,
-      upvotes: updatedComment.upvotes_count,
-      downvotes: updatedComment.downvotes_count,
+      upvotes: (updatedCounts.data as any)?.upvotes_count ?? 0,
+      downvotes: (updatedCounts.data as any)?.downvotes_count ?? 0,
     });
   } catch (error) {
     console.error("API Error:", error);

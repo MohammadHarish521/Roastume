@@ -88,10 +88,10 @@ export async function POST(
 // GET /api/resumes/[id]/comments - Fetch comments for a resume (with replies)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Try fetching top-level comments (parent_id null). If column missing, fallback without filter
     let repliesSupported = true as boolean;
