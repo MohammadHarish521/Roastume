@@ -1,9 +1,5 @@
 # 🎯 Roastume - Resume Feedback Platform
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/harishs-projects-883913b8/v0-roastume-website-ui)
-[![Built with Next.js](https://img.shields.io/badge/Built%20with-Next.js%2015-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
-[![Powered by Supabase](https://img.shields.io/badge/Powered%20by-Supabase-green?style=for-the-badge&logo=supabase)](https://supabase.com/)
-
 ## 🚀 Overview
 
 Roastume is a modern web application that allows users to share their resumes and receive constructive feedback ("roasts") from the community. Built with a unique comic-book inspired design, it makes the traditionally stressful process of resume feedback fun and engaging.
