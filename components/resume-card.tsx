@@ -31,7 +31,7 @@ export function ResumeCard({ resume }: { resume: Resume }) {
         variant="cream"
         fontStyle="none"
         shadow="large"
-        className="grid gap-3 sm:gap-4 border-[3px] sm:border-[4px] border-[#2c2c2c] rounded-xl sm:rounded-2xl p-4 sm:p-6 aspect-[4/3] sm:aspect-[16/10] w-full max-w-sm sm:max-w-md"
+        className="grid grid-rows-[auto_1fr_auto] gap-3 sm:gap-4 border-[3px] sm:border-[4px] border-[#2c2c2c] rounded-xl sm:rounded-2xl p-4 sm:p-6 h-full min-h-[250px]"
       >
         {/* Header section with avatar and info */}
         <div className="flex items-start gap-3 sm:gap-4 mb-2">
@@ -62,11 +62,16 @@ export function ResumeCard({ resume }: { resume: Resume }) {
             <p
               className={cn(
                 body.className,
-                "text-sm sm:text-base leading-relaxed text-[#2c2c2c] italic line-clamp-2 sm:line-clamp-none"
+                "text-sm sm:text-base leading-relaxed text-[#2c2c2c] italic line-clamp-2"
               )}
             >
               {resume.blurb || "No description provided."}
             </p>
+            {resume.blurb && resume.blurb.length > 140 && (
+              <span className="mt-1 inline-block text-xs text-[#2c2c2c]/70">
+                …
+              </span>
+            )}
             <div className="mt-2 sm:mt-3 flex items-center gap-2 text-xs sm:text-sm text-[#2c2c2c]/70">
               <span className="flex items-center">
                 <FaCalendar className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />{" "}
