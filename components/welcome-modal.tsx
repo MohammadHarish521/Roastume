@@ -94,9 +94,12 @@ export function WelcomeModal() {
           <div className="grid gap-4 mb-6">
             <div className="border-[3px] border-[#2c2c2c] bg-[#F2D5A3] shadow-[3px_3px_0_#2c2c2c] rounded-lg p-4">
               <h3
-                className={cn(body.className, "font-bold text-[#2c2c2c] mb-2")}
+                className={cn(
+                  display.className,
+                  "font-bold text-[#2c2c2c] mb-2"
+                )}
               >
-                💡 What is Roastume?
+                What is Roastume?
               </h3>
               <p className={cn(body.className, "text-sm text-[#2c2c2c]/80")}>
                 A playful platform where you can get constructive feedback on
@@ -106,9 +109,12 @@ export function WelcomeModal() {
 
             <div className="border-[3px] border-[#2c2c2c] bg-[#F8E4C6] shadow-[3px_3px_0_#2c2c2c] rounded-lg p-4">
               <h3
-                className={cn(body.className, "font-bold text-[#2c2c2c] mb-2")}
+                className={cn(
+                  display.className,
+                  "font-bold text-[#2c2c2c] mb-2"
+                )}
               >
-                🎯 How it works
+                How it works
               </h3>
               <p className={cn(body.className, "text-sm text-[#2c2c2c]/80")}>
                 Upload your resume, get roasted (constructively!), and help
@@ -126,13 +132,13 @@ export function WelcomeModal() {
                 "w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 border-[3px] border-[#2c2c2c] shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform text-lg rounded-full"
               )}
             >
-              🚀 Get Started - Sign In
+              Get Started - Sign In
             </button>
 
             <button
               onClick={() => setIsOpen(false)}
               className={cn(
-                body.className,
+                display.className,
                 "w-full bg-[#EBDDBF] hover:bg-[#EBDDBF]/80 text-[#2c2c2c] font-bold py-2 px-4 border-[2px] border-[#2c2c2c] shadow-[2px_2px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform rounded-full"
               )}
             >
@@ -142,7 +148,7 @@ export function WelcomeModal() {
 
           {/* Footer note */}
           <div className="text-center mt-4">
-            <p className={cn(body.className, "text-xs text-[#2c2c2c]/60")}>
+            <p className={cn(display.className, "text-xs text-[#2c2c2c]/60")}>
               By signing in, you agree to keep feedback constructive and fun.
               Let&apos;s build each other up! 🚀
             </p>

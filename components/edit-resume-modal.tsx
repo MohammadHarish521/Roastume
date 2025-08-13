@@ -123,7 +123,7 @@ export function EditResumeModal({
           <div>
             <label
               className={cn(
-                body.className,
+                display.className,
                 "block text-lg font-bold text-[#2c2c2c] mb-2"
               )}
             >
@@ -147,7 +147,7 @@ export function EditResumeModal({
           <div>
             <label
               className={cn(
-                body.className,
+                display.className,
                 "block text-lg font-bold text-[#2c2c2c] mb-2"
               )}
             >
@@ -170,7 +170,7 @@ export function EditResumeModal({
           <div>
             <label
               className={cn(
-                body.className,
+                display.className,
                 "block text-lg font-bold text-[#2c2c2c] mb-2"
               )}
             >
@@ -180,7 +180,7 @@ export function EditResumeModal({
               {formData.fileUrl && (
                 <div className="p-3 bg-green-100 border-[3px] border-green-400 rounded-lg">
                   <p className={cn(body.className, "text-sm text-green-800")}>
-                    ✅ File uploaded:{" "}
+                    File uploaded:{" "}
                     {formData.fileType === "pdf" ? "PDF" : "Image"}
                   </p>
                 </div>
