@@ -37,12 +37,14 @@ export interface ApiProfile {
 // Resume API functions
 export async function fetchResumes(
   page: number = 1,
-  pageSize: number = 9
+  pageSize: number = 9,
+  query?: string
 ): Promise<{ resumes: ApiResume[]; total: number }> {
   const params = new URLSearchParams({
     page: String(page),
     pageSize: String(pageSize),
   });
+  if (query && query.trim()) params.set("q", query.trim());
   const response = await fetch(`/api/resumes?${params.toString()}`);
   if (!response.ok) {
     throw new Error("Failed to fetch resumes");

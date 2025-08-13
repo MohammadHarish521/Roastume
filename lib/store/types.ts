@@ -48,6 +48,10 @@ export type Store = {
   loadComments: (resumeId: string) => Promise<void>;
   find: (id: string) => Resume | undefined;
   byOwner: (ownerId: string) => Resume[];
-  refreshResumes: (page?: number, pageSize?: number) => Promise<void>;
+  refreshResumes: (
+    page?: number,
+    pageSize?: number,
+    searchQuery?: string
+  ) => Promise<void>;
   fetchMyResumes: () => Promise<Resume[]>;
 };

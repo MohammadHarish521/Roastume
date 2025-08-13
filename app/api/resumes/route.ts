@@ -21,14 +21,9 @@ export async function GET(request: NextRequest) {
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
-    const {
-      data: resumes,
-      error,
-      count,
-    } = await supabase
-      .from("resumes")
-      .select(
-        `
+    const q = (searchParams.get("q") || "").trim();
+    let query = supabase.from("resumes").select(
+      `
         *,
         profiles:user_id (
           id,
@@ -36,24 +31,21 @@ export async function GET(request: NextRequest) {
           avatar_url
         )
       `,
-        { count: "exact", head: false }
-      )
-      .order("created_at", { ascending: false });
+      { count: "exact", head: false }
+    );
 
-    // Apply range for pagination
-    const ranged = await supabase
-      .from("resumes")
-      .select(
-        `
-        *,
-        profiles:user_id (
-          id,
-          name,
-          avatar_url
-        )
-      `,
-        { count: "exact", head: false }
-      )
+    if (q) {
+      // Search by name or blurb
+      query = query.or(
+        `name.ilike.%${q
+          .replaceAll("%", "")
+          .replaceAll("_", "_")}%,blurb.ilike.%${q
+          .replaceAll("%", "")
+          .replaceAll("_", "_")}%`
+      );
+    }
+
+    const ranged = await query
       .order("created_at", { ascending: false })
       .range(from, to);
 
@@ -81,7 +73,7 @@ export async function GET(request: NextRequest) {
         avatar: resume.profiles?.avatar_url || "/cartoon-avatar-user.png",
       })) || [];
 
-    const total = ranged.count ?? count ?? transformedResumes.length;
+    const total = ranged.count ?? transformedResumes.length;
     return NextResponse.json({ resumes: transformedResumes, total });
   } catch (error) {
     console.error("API Error:", error);

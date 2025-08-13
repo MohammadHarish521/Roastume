@@ -111,7 +111,12 @@ export default function Page() {
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
             <div className="flex-1 w-full sm:w-auto">
               <SearchBar
-                onSearch={setSearchQuery}
+                onSearch={(q) => {
+                  setSearchQuery(q);
+                  const next = 1;
+                  setPage(next);
+                  refreshResumes(next, pageSize, q);
+                }}
                 placeholder="Search resumes by title or description..."
                 className="w-full"
               />
