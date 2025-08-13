@@ -54,7 +54,7 @@ export default function ResumeDetail() {
 
   return (
     <div className="grid gap-6">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
         <button
           onClick={() => router.back()}
           className={cn(
@@ -68,7 +68,7 @@ export default function ResumeDetail() {
         <h2
           className={cn(
             display.className,
-            "ml-2 text-3xl font-extrabold tracking-wide text-[#F2D5A3]"
+            "ml-2 text-2xl sm:text-3xl font-extrabold tracking-wide text-[#F2D5A3] break-words"
           )}
           style={{
             textShadow: [

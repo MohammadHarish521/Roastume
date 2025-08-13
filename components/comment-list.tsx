@@ -74,18 +74,18 @@ export function CommentList({ resumeId }: { resumeId: string }) {
         Comments
       </h3>
 
-      <form onSubmit={onSubmit} className="flex items-start gap-3">
+      <form onSubmit={onSubmit} className="flex items-start gap-2 sm:gap-3">
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Drop your best roast (be kind) ..."
-          className="min-h-[70px] flex-1 rounded-2xl border-[3px] border-[#2c2c2c] bg-[#F2D5A3] p-3 shadow-[4px_4px_0_#2c2c2c] focus:outline-none focus:shadow-[6px_6px_0_#2c2c2c] transition-all"
+          className="min-h-[70px] w-full sm:flex-1 rounded-2xl border-[3px] border-[#2c2c2c] bg-[#F2D5A3] p-3 shadow-[4px_4px_0_#2c2c2c] focus:outline-none focus:shadow-[6px_6px_0_#2c2c2c] transition-all"
           disabled={isSubmitting}
         />
         <button
           type="submit"
           disabled={isSubmitting || !text.trim()}
-          className="h-fit rounded-full border-[3px] border-[#2c2c2c] bg-[#EBDDBF] px-4 py-2 font-bold shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+          className="h-fit rounded-full border-[3px] border-[#2c2c2c] bg-[#EBDDBF] px-3 sm:px-4 py-2 font-bold shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? "Posting..." : "Post"}
         </button>
