@@ -59,8 +59,8 @@ export function EditResumeModal({
       return;
     }
 
-    // If image, open redactor first
-    if (file.type.startsWith("image/")) {
+    // If image or PDF, open redactor first
+    if (file.type.startsWith("image/") || file.type === "application/pdf") {
       setPendingFile(file);
       setShowRedactor(true);
       return;
@@ -240,8 +240,9 @@ export function EditResumeModal({
                   "text-xs text-[#2c2c2c]/70 text-center"
                 )}
               >
-                Tip: For images, you can preview and mask emails/phone numbers
-                before uploading.
+                Tip: For images and PDFs you can preview and mask sensitive info
+                before uploading. For PDFs, the selected page will be exported
+                as a PNG.
               </p>
               <p
                 className={cn(
