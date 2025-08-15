@@ -14,7 +14,7 @@ import { display } from "@/lib/fonts";
 import { FaBell, FaCheck, FaBellSlash, FaSpinner } from "react-icons/fa";
 import { toast } from "sonner";
 
-export function NotificationsBell() {
+export function NotificationsBell({ compact = false }: { compact?: boolean }) {
   const { data: session } = useSession();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -97,13 +97,20 @@ export function NotificationsBell() {
         onClick={() => setOpen((v) => !v)}
         className={cn(
           display.className,
-          "relative flex items-center gap-2 rounded-full border-[3px] border-[#2c2c2c] bg-[#F8E4C6] px-3 py-2 text-base font-bold shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform"
+          compact
+            ? "relative flex items-center justify-center w-12 h-12 rounded-full border-[3px] border-[#2c2c2c] bg-[#F8E4C6] shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform"
+            : "relative flex items-center gap-2 rounded-full border-[3px] border-[#2c2c2c] bg-[#F8E4C6] px-3 py-2 text-base font-bold shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform"
         )}
         aria-label="Notifications"
       >
-        <FaBell className="h-4 w-4" />
-        {unreadCount > 0 && (
+        <FaBell className={compact ? "h-5 w-5" : "h-4 w-4"} />
+        {!compact && unreadCount > 0 && (
           <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs font-black text-white border-2 border-[#2c2c2c]">
+            {unreadCount}
+          </span>
+        )}
+        {compact && unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-[6px] text-xs font-black text-white border-2 border-[#2c2c2c]">
             {unreadCount}
           </span>
         )}

@@ -132,7 +132,7 @@ export default function Navbar() {
 
             {/* Navigation Dropdown */}
             {isNavOpen && (
-              <div className="absolute left-0 top-14 w-48 bg-[#97D4D5] border-[3px] border-[#2c2c2c] rounded-2xl shadow-[4px_4px_0_#2c2c2c] overflow-hidden z-50">
+              <div className="absolute left-0 top-14 w-56 bg-[#97D4D5] border-[3px] border-[#2c2c2c] rounded-2xl shadow-[4px_4px_0_#2c2c2c] overflow-hidden z-50">
                 <div className="py-2">
                   <Link
                     href="/"
@@ -185,48 +185,50 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Right - Profile Dropdown */}
-          <div className="relative">
-            <NotificationsBell />
-            <button
-              onClick={() => {
-                setIsProfileOpen(!isProfileOpen);
-                setIsNavOpen(false);
-              }}
-              className={cn(
-                display.className,
-                "flex items-center justify-center w-12 h-12 rounded-full border-[3px] border-[#2c2c2c] bg-[#F2D5A3] shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform"
-              )}
-              aria-label="Profile menu"
-            >
-              {isProfileOpen ? (
-                <FaTimes className="h-5 w-5" />
-              ) : (
-                <FaEllipsisV className="h-5 w-5" />
-              )}
-            </button>
+          {/* Right - Profile + Notifications */}
+          <div className="flex items-center gap-3">
+            <NotificationsBell compact />
+            <div className="relative">
+              <button
+                onClick={() => {
+                  setIsProfileOpen(!isProfileOpen);
+                  setIsNavOpen(false);
+                }}
+                className={cn(
+                  display.className,
+                  "flex items-center justify-center w-12 h-12 rounded-full border-[3px] border-[#2c2c2c] bg-[#F2D5A3] shadow-[3px_3px_0_#2c2c2c] hover:-translate-y-0.5 transition-transform"
+                )}
+                aria-label="Profile menu"
+              >
+                {isProfileOpen ? (
+                  <FaTimes className="h-5 w-5" />
+                ) : (
+                  <FaEllipsisV className="h-5 w-5" />
+                )}
+              </button>
 
-            {/* Profile Dropdown */}
-            {isProfileOpen && (
-              <div className="absolute right-0 top-14 w-48 bg-[#97D4D5] border-[3px] border-[#2c2c2c] rounded-2xl shadow-[4px_4px_0_#2c2c2c] overflow-hidden z-50">
-                <div className="py-2">
-                  <Link
-                    href="/profile"
-                    onClick={() => setIsProfileOpen(false)}
-                    className={cn(
-                      display.className,
-                      "flex items-center gap-3 px-4 py-3 text-base font-bold text-[#2c2c2c] hover:bg-[#F2D5A3] transition-colors border-b border-[#2c2c2c]/20"
-                    )}
-                  >
-                    <FaUserCircle className="h-4 w-4" />
-                    My Profile
-                  </Link>
-                  <div className="px-4 py-3">
-                    <AuthButton />
+              {/* Profile Dropdown */}
+              {isProfileOpen && (
+                <div className="absolute right-0 top-14 w-56 bg-[#97D4D5] border-[3px] border-[#2c2c2c] rounded-2xl shadow-[4px_4px_0_#2c2c2c] overflow-hidden z-50">
+                  <div className="py-2">
+                    <Link
+                      href="/profile"
+                      onClick={() => setIsProfileOpen(false)}
+                      className={cn(
+                        display.className,
+                        "flex items-center gap-3 px-4 py-3 text-base font-bold text-[#2c2c2c] hover:bg-[#F2D5A3] transition-colors border-b border-[#2c2c2c]/20"
+                      )}
+                    >
+                      <FaUserCircle className="h-4 w-4" />
+                      My Profile
+                    </Link>
+                    <div className="px-4 py-3">
+                      <AuthButton />
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -12,7 +12,7 @@ const supabase = createClient<Database>(
 // POST /api/resumes/[id]/comments - Add comment to resume
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -20,7 +20,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { text } = body;
 
@@ -62,24 +62,31 @@ export async function POST(
     // Count is handled by DB trigger; no manual update here
 
     // Notification for resume owner
-    const { data: resumeOwner } = await supabase
+    const { data: resumeOwner, error: resumeOwnerErr } = await supabase
       .from("resumes")
       .select("user_id, name")
       .eq("id", id)
       .single();
+
+    if (resumeOwnerErr) {
+      console.error("lookup resume owner failed", resumeOwnerErr);
+    }
 
     if (resumeOwner && resumeOwner.user_id !== session.user.id) {
       const actorName = session.user.name || "Someone";
       const message = `${actorName} commented on your resume${
         resumeOwner.name ? ` "${resumeOwner.name}"` : ""
       }`;
-      await supabase.from("notifications").insert({
+      const { error: notifErr } = await supabase.from("notifications").insert({
         user_id: resumeOwner.user_id,
         type: "comment",
         resume_id: id,
         actor_id: session.user.id,
         message,
       });
+      if (notifErr) {
+        console.error("insert notification (comment) failed", notifErr);
+      }
     }
 
     // Transform comment to match frontend format

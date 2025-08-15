@@ -12,7 +12,7 @@ const supabase = createClient<Database>(
 // POST /api/comments/[id]/replies - Add reply to comment
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -20,7 +20,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { text } = body;
 
@@ -113,24 +113,33 @@ export async function POST(
 
     if (parentWithResume?.resume_id) {
       const resumeId = parentWithResume.resume_id as string;
-      const { data: resumeOwner } = await supabase
+      const { data: resumeOwner, error: resumeOwnerErr } = await supabase
         .from("resumes")
         .select("user_id, name")
         .eq("id", resumeId)
         .single();
+
+      if (resumeOwnerErr) {
+        console.error("lookup resume owner failed", resumeOwnerErr);
+      }
 
       if (resumeOwner && resumeOwner.user_id !== session.user.id) {
         const actorName = session.user.name || "Someone";
         const message = `${actorName} replied on your resume${
           resumeOwner.name ? ` "${resumeOwner.name}"` : ""
         }`;
-        await supabase.from("notifications").insert({
-          user_id: resumeOwner.user_id,
-          type: "reply",
-          resume_id: resumeId,
-          actor_id: session.user.id,
-          message,
-        });
+        const { error: notifErr } = await supabase
+          .from("notifications")
+          .insert({
+            user_id: resumeOwner.user_id,
+            type: "reply",
+            resume_id: resumeId,
+            actor_id: session.user.id,
+            message,
+          });
+        if (notifErr) {
+          console.error("insert notification (reply) failed", notifErr);
+        }
       }
     }
 

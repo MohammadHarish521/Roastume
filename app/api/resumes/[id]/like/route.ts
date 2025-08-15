@@ -12,7 +12,7 @@ const supabase = createClient<Database>(
 // POST /api/resumes/[id]/like - Toggle like on resume
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -20,11 +20,13 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
+
     // Check if user already liked this resume
     const { data: existingLike, error: checkError } = await supabase
       .from("likes")
       .select("id")
-      .eq("resume_id", params.id)
+      .eq("resume_id", id)
       .eq("user_id", session.user.id)
       .single();
 
@@ -61,7 +63,7 @@ export async function POST(
     } else {
       // Like: Add like
       const { error: insertError } = await supabase.from("likes").insert({
-        resume_id: params.id,
+        resume_id: id,
         user_id: session.user.id,
       });
 
@@ -77,27 +79,36 @@ export async function POST(
       const { count } = await supabase
         .from("likes")
         .select("id", { count: "exact", head: true })
-        .eq("resume_id", params.id);
+        .eq("resume_id", id);
 
       // Create notification for resume owner
-      const { data: resumeOwner } = await supabase
+      const { data: resumeOwner, error: resumeOwnerErr } = await supabase
         .from("resumes")
         .select("user_id, name")
-        .eq("id", params.id)
+        .eq("id", id)
         .single();
+
+      if (resumeOwnerErr) {
+        console.error("lookup resume owner failed", resumeOwnerErr);
+      }
 
       if (resumeOwner && resumeOwner.user_id !== session.user.id) {
         const actorName = session.user.name || "Someone";
         const message = `${actorName} liked your resume${
           resumeOwner.name ? ` "${resumeOwner.name}"` : ""
         }`;
-        await supabase.from("notifications").insert({
-          user_id: resumeOwner.user_id,
-          type: "like",
-          resume_id: params.id,
-          actor_id: session.user.id,
-          message,
-        });
+        const { error: notifErr } = await supabase
+          .from("notifications")
+          .insert({
+            user_id: resumeOwner.user_id,
+            type: "like",
+            resume_id: id,
+            actor_id: session.user.id,
+            message,
+          });
+        if (notifErr) {
+          console.error("insert notification (like) failed", notifErr);
+        }
       }
 
       return NextResponse.json({ liked: true, likesCount: count || 0 });
