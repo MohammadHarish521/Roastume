@@ -151,6 +151,38 @@ export interface Database {
           created_at?: string;
         };
       };
+      notifications: {
+        Row: {
+          id: string;
+          user_id: string;
+          type: "like" | "comment" | "reply";
+          resume_id: string | null;
+          actor_id: string;
+          message: string;
+          is_read: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          type: "like" | "comment" | "reply";
+          resume_id?: string | null;
+          actor_id: string;
+          message: string;
+          is_read?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          type?: "like" | "comment" | "reply";
+          resume_id?: string | null;
+          actor_id?: string;
+          message?: string;
+          is_read?: boolean;
+          created_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;

@@ -13,6 +13,7 @@ import {
   FaUserCircle,
 } from "react-icons/fa";
 import AuthButton from "./auth-button";
+import { NotificationsBell } from "./notifications";
 
 export default function Navbar() {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -91,6 +92,7 @@ export default function Navbar() {
 
           {/* Right side - User Actions */}
           <div className="flex items-center gap-3 justify-end">
+            <NotificationsBell />
             <Link
               href="/profile"
               className={cn(
@@ -185,6 +187,7 @@ export default function Navbar() {
 
           {/* Right - Profile Dropdown */}
           <div className="relative">
+            <NotificationsBell />
             <button
               onClick={() => {
                 setIsProfileOpen(!isProfileOpen);

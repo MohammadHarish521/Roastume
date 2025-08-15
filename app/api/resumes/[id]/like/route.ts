@@ -79,6 +79,27 @@ export async function POST(
         .select("id", { count: "exact", head: true })
         .eq("resume_id", params.id);
 
+      // Create notification for resume owner
+      const { data: resumeOwner } = await supabase
+        .from("resumes")
+        .select("user_id, name")
+        .eq("id", params.id)
+        .single();
+
+      if (resumeOwner && resumeOwner.user_id !== session.user.id) {
+        const actorName = session.user.name || "Someone";
+        const message = `${actorName} liked your resume${
+          resumeOwner.name ? ` "${resumeOwner.name}"` : ""
+        }`;
+        await supabase.from("notifications").insert({
+          user_id: resumeOwner.user_id,
+          type: "like",
+          resume_id: params.id,
+          actor_id: session.user.id,
+          message,
+        });
+      }
+
       return NextResponse.json({ liked: true, likesCount: count || 0 });
     }
   } catch (error) {

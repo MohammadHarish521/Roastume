@@ -104,6 +104,36 @@ export async function POST(
       );
     }
 
+    // Notification for resume owner (and optionally parent comment author in future)
+    const { data: parentWithResume } = await supabase
+      .from("comments")
+      .select("resume_id")
+      .eq("id", id)
+      .single();
+
+    if (parentWithResume?.resume_id) {
+      const resumeId = parentWithResume.resume_id as string;
+      const { data: resumeOwner } = await supabase
+        .from("resumes")
+        .select("user_id, name")
+        .eq("id", resumeId)
+        .single();
+
+      if (resumeOwner && resumeOwner.user_id !== session.user.id) {
+        const actorName = session.user.name || "Someone";
+        const message = `${actorName} replied on your resume${
+          resumeOwner.name ? ` "${resumeOwner.name}"` : ""
+        }`;
+        await supabase.from("notifications").insert({
+          user_id: resumeOwner.user_id,
+          type: "reply",
+          resume_id: resumeId,
+          actor_id: session.user.id,
+          message,
+        });
+      }
+    }
+
     // Transform reply to match frontend format
     const transformedReply = {
       id: reply.id,

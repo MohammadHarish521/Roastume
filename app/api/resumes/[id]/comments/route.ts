@@ -61,6 +61,27 @@ export async function POST(
 
     // Count is handled by DB trigger; no manual update here
 
+    // Notification for resume owner
+    const { data: resumeOwner } = await supabase
+      .from("resumes")
+      .select("user_id, name")
+      .eq("id", id)
+      .single();
+
+    if (resumeOwner && resumeOwner.user_id !== session.user.id) {
+      const actorName = session.user.name || "Someone";
+      const message = `${actorName} commented on your resume${
+        resumeOwner.name ? ` "${resumeOwner.name}"` : ""
+      }`;
+      await supabase.from("notifications").insert({
+        user_id: resumeOwner.user_id,
+        type: "comment",
+        resume_id: id,
+        actor_id: session.user.id,
+        message,
+      });
+    }
+
     // Transform comment to match frontend format
     const transformedComment = {
       id: comment.id,

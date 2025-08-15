@@ -34,6 +34,19 @@ export interface ApiProfile {
   updated_at: string;
 }
 
+export type NotificationType = "like" | "comment" | "reply";
+
+export interface ApiNotification {
+  id: string;
+  user_id: string;
+  type: NotificationType;
+  resume_id: string | null;
+  actor_id: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+}
+
 // Resume API functions
 export async function fetchResumes(
   page: number = 1,
@@ -114,6 +127,31 @@ export async function likeResume(
   }
 
   return response.json();
+}
+
+export async function fetchNotifications(): Promise<ApiNotification[]> {
+  const response = await fetch("/api/notifications");
+  if (!response.ok) {
+    throw new Error("Failed to fetch notifications");
+  }
+  const data = await response.json();
+  return data.notifications as ApiNotification[];
+}
+
+export async function markNotificationRead(id: string): Promise<void> {
+  const response = await fetch(`/api/notifications/${id}`, { method: "PUT" });
+  if (!response.ok) {
+    throw new Error("Failed to update notification");
+  }
+}
+
+export async function markAllNotificationsRead(): Promise<void> {
+  const response = await fetch(`/api/notifications/mark-all-read`, {
+    method: "POST",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to mark all notifications read");
+  }
 }
 
 export async function addComment(

@@ -1,4 +1,5 @@
 import AuthSessionProvider from "@/components/session-provider";
+import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
@@ -33,7 +34,10 @@ html {
         `}</style>
       </head>
       <body>
-        <AuthSessionProvider>{children}</AuthSessionProvider>
+        <AuthSessionProvider>
+          {children}
+          <Toaster richColors closeButton position="top-right" theme="light" />
+        </AuthSessionProvider>
         <Analytics />
       </body>
     </html>
