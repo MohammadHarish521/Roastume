@@ -4,7 +4,6 @@ import { ComicCard } from "@/components/comic-card";
 import { CommentList } from "@/components/comment-list";
 import { body, display } from "@/lib/fonts";
 import { useRoastume } from "@/lib/store";
-import { fetchResume } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import dynamic from "next/dynamic";
@@ -16,74 +15,27 @@ import { useAuthModal } from "@/components/auth-modal-provider";
 export default function ResumeDetail() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { find } = useRoastume();
-  const resumeFromStore = find(id);
-  const [resume, setResume] = useState(resumeFromStore);
-  const [loading, setLoading] = useState(!resumeFromStore);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    // If not present in store (direct visit), fetch from API
-    if (!resumeFromStore && id) {
-      let isActive = true;
-      setLoading(true);
-      setError(null);
-      fetchResume(id)
-        .then((apiResume) => {
-          if (!isActive) return;
-          // Transform minimal fields to match store Resume shape if needed
-          setResume({
-            id: apiResume.id,
-            name: apiResume.name,
-            blurb: apiResume.blurb ?? "",
-            likes: apiResume.likes,
-            comments: [],
-            fileUrl: apiResume.fileUrl ?? undefined,
-            fileType: (apiResume.fileType as any) ?? undefined,
-            ownerId: apiResume.ownerId,
-            createdAt: apiResume.createdAt,
-            avatar: apiResume.avatar,
-          } as any);
-        })
-        .catch(() => {
-          if (!isActive) return;
-          setError("not_found");
-        })
-        .finally(() => {
-          if (!isActive) return;
-          setLoading(false);
-        });
-      return () => {
-        isActive = false;
-      };
-    } else {
-      setResume(resumeFromStore);
-      setLoading(false);
-    }
-  }, [id, resumeFromStore]);
+  const { find, like } = useRoastume();
+  const resume = find(id);
   const pdfUrl =
     resume?.fileType === "pdf" && resume.fileUrl
       ? `/api/pdf?url=${encodeURIComponent(resume.fileUrl)}`
       : undefined;
+  const PdfViewer = useMemo(
+    () =>
+      dynamic(
+        () => import("@/components/pdf-viewer").then((m) => m.PdfViewer),
+        {
+          ssr: false,
+          loading: () => (
+            <div className="p-4 text-center">Preparing viewer…</div>
+          ),
+        }
+      ),
+    []
+  );
 
-  // Only prepare the PDF viewer when we actually have a PDF to render
-  const PdfViewer = useMemo(() => {
-    if (!pdfUrl) return null;
-    return dynamic(
-      () => import("@/components/pdf-viewer").then((m) => m.PdfViewer),
-      {
-        ssr: false,
-        loading: () => <div className="p-4 text-center">Preparing viewer…</div>,
-      }
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pdfUrl]);
-
-  if (loading) {
-    return <div className="p-4">Loading…</div>;
-  }
-
-  if (!resume || error === "not_found") {
+  if (!resume) {
     return (
       <div className="grid gap-4">
         <p>Resume not found.</p>
@@ -151,7 +103,7 @@ export default function ResumeDetail() {
               </div>
             ) : (
               <div className="grid gap-2">
-                {pdfUrl && PdfViewer ? (
+                {pdfUrl ? (
                   <PdfViewer url={pdfUrl} />
                 ) : (
                   <div className="p-4 text-center">No PDF URL available.</div>
