@@ -26,6 +26,7 @@ export type Resume = {
 export type Store = {
   currentUser: { id: string; name: string; avatar: string };
   resumes: Resume[];
+  totalResumes: number;
   loading: boolean;
   error: string | null;
   addResume: (
@@ -53,5 +54,6 @@ export type Store = {
     pageSize?: number,
     searchQuery?: string
   ) => Promise<void>;
+  fetchResumeById: (id: string) => Promise<Resume | null>;
   fetchMyResumes: () => Promise<Resume[]>;
 };

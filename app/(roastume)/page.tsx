@@ -121,17 +121,6 @@ export default function Page() {
                 className="w-full"
               />
             </div>
-            <div className="text-sm text-gray-600 whitespace-nowrap">
-              {searchQuery ? (
-                <span className={cn(body.className, "font-medium")}>
-                  {filteredResumes.length} of {resumes.length} resumes
-                </span>
-              ) : (
-                <span className={cn(body.className, "font-medium")}>
-                  {resumes.length} resume{resumes.length !== 1 ? "s" : ""}
-                </span>
-              )}
-            </div>
           </div>
         </ComicCard>
       )}

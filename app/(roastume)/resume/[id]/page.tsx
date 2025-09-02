@@ -15,8 +15,24 @@ import { useAuthModal } from "@/components/auth-modal-provider";
 export default function ResumeDetail() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { find, like } = useRoastume();
+  const { find, like, fetchResumeById, loading } = useRoastume();
   const resume = find(id);
+  const [notFound, setNotFound] = useState(false);
+
+  useEffect(() => {
+    if (!resume && id) {
+      let isActive = true;
+      fetchResumeById(id).then((res) => {
+        if (!isActive) return;
+        if (!res) setNotFound(true);
+      });
+      return () => {
+        isActive = false;
+      };
+    } else {
+      setNotFound(false);
+    }
+  }, [id, resume, fetchResumeById]);
   const pdfUrl =
     resume?.fileType === "pdf" && resume.fileUrl
       ? `/api/pdf?url=${encodeURIComponent(resume.fileUrl)}`
@@ -35,7 +51,20 @@ export default function ResumeDetail() {
     []
   );
 
-  if (!resume) {
+  if (!resume && (loading || !notFound)) {
+    return (
+      <div className="grid gap-6">
+        <ComicCard className="p-8 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2c2c2c] mx-auto mb-4"></div>
+          <p className={cn(body.className, "text-lg font-bold")}>
+            Loading resume...
+          </p>
+        </ComicCard>
+      </div>
+    );
+  }
+
+  if (!resume && notFound) {
     return (
       <div className="grid gap-4">
         <p>Resume not found.</p>

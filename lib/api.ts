@@ -69,7 +69,14 @@ export async function fetchResumes(
 export async function fetchResume(id: string): Promise<ApiResume> {
   const response = await fetch(`/api/resumes/${id}`);
   if (!response.ok) {
-    throw new Error("Failed to fetch resume");
+    let message = "Failed to fetch resume";
+    try {
+      const err = await response.json();
+      if (err?.error) message = err.error;
+    } catch {}
+    const error: any = new Error(message);
+    (error as any).status = response.status;
+    throw error;
   }
   const data = await response.json();
   return data.resume;

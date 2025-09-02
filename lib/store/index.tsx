@@ -11,6 +11,7 @@ const StoreCtx = createContext<Store | null>(null);
 
 export function RoastumeProvider({ children }: { children: React.ReactNode }) {
   const [resumes, setResumes] = useState<Resume[]>([]);
+  const [totalResumes, setTotalResumes] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { data: session } = useSession();
@@ -26,8 +27,9 @@ export function RoastumeProvider({ children }: { children: React.ReactNode }) {
 
   // Create action handlers
   const resumeActions = useMemo(
-    () => createResumeActions(setResumes, setLoading, setError),
-    [setResumes, setLoading, setError]
+    () =>
+      createResumeActions(setResumes, setLoading, setError, setTotalResumes),
+    [setResumes, setLoading, setError, setTotalResumes]
   );
   const commentActions = useMemo(
     () => createCommentActions(setResumes),
@@ -47,6 +49,7 @@ export function RoastumeProvider({ children }: { children: React.ReactNode }) {
   const value: Store = {
     currentUser,
     resumes,
+    totalResumes,
     loading,
     error,
     ...resumeActions,

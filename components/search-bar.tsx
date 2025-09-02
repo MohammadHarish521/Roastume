@@ -4,6 +4,7 @@ import { body } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import { useRef, useState } from "react";
+import { useRoastume } from "@/lib/store";
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -18,6 +19,7 @@ export function SearchBar({
 }: SearchBarProps) {
   const [query, setQuery] = useState("");
   const debounceRef = useRef<number | null>(null);
+  const { totalResumes } = useRoastume();
 
   const triggerSearch = (value: string) => {
     if (debounceRef.current) {
@@ -40,8 +42,8 @@ export function SearchBar({
   };
 
   return (
-    <div className={cn("relative w-full", className)}>
-      <div className="relative">
+    <div className={cn("w-full flex items-center gap-4", className)}>
+      <div className="relative flex-1">
         <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#2c2c2c] w-5 h-5" />
         <input
           type="text"
@@ -80,16 +82,11 @@ export function SearchBar({
             <FaTimes className="w-5 h-5" />
           </button>
         )}
-        {!query && (
-          <button
-            onClick={() => triggerSearch(query)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#2c2c2c] hover:text-[#111] transition-colors"
-            aria-label="Search"
-            type="button"
-          >
-            <FaSearch className="w-5 h-5" />
-          </button>
-        )}
+      </div>
+      <div className="text-sm text-gray-600 whitespace-nowrap flex-shrink-0">
+        <span className={cn(body.className, "font-medium")}>
+          {totalResumes} resume{totalResumes !== 1 ? "s" : ""}
+        </span>
       </div>
     </div>
   );
