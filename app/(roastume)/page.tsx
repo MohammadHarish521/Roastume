@@ -9,7 +9,11 @@ import { useRoastume } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { FaTimes } from "react-icons/fa";
 import { useSession } from "next-auth/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { FaTrophy } from "react-icons/fa";
+import { fetchProfile } from "@/lib/api";
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export default function Page() {
   const { data: session } = useSession();
@@ -71,6 +75,8 @@ export default function Page() {
 
   return (
     <div className="grid gap-6">
+      {/* Congrats toast on high like count */}
+      <PageCongratsToast />
       {session && showWelcome && (
         <ComicCard className="p-4 bg-gradient-to-r from-[#F2D5A3] to-[#F8E4C6] relative">
           <button
@@ -228,4 +234,55 @@ export default function Page() {
       <WelcomeModal />
     </div>
   );
+}
+
+function PageCongratsToast() {
+  const supabase = getSupabaseBrowserClient();
+
+  useEffect(() => {
+    const run = async () => {
+      try {
+        const { count, error } = await supabase
+          .from("profiles")
+          .select("id", { count: "exact", head: true });
+        if (error) return;
+        const totalUsers = count ?? 0;
+        if (totalUsers >= 100) {
+          setTimeout(() => {
+            toast.custom(
+              () => (
+                <div className="pointer-events-auto max-w-sm w-full rounded-2xl comic-border bg-[#F2D5A3] comic-shadow-4 p-3 flex items-start gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#97D4D5] border-2 border-[#2c2c2c]">
+                    <FaTrophy className="h-4 w-4 text-[#2c2c2c]" />
+                  </div>
+                  <div className="flex-1">
+                    <p
+                      className={cn(
+                        display.className,
+                        "text-sm font-black leading-tight"
+                      )}
+                    >
+                      We hit 100+ users!
+                    </p>
+                    <p
+                      className={cn(
+                        body.className,
+                        "text-xs font-medium opacity-80"
+                      )}
+                    >
+                      Community size: {totalUsers}
+                    </p>
+                  </div>
+                </div>
+              ),
+              { duration: 6000 }
+            );
+          }, 250);
+        }
+      } catch {}
+    };
+    run();
+  }, [supabase]);
+
+  return null;
 }
