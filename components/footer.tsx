@@ -60,7 +60,7 @@ export default function Footer() {
             <div className="flex justify-center md:justify-end gap-3 mb-4">
               <button className="p-2 rounded-full comic-border-2 bg-[#EBDDBF] comic-shadow-2 hover:-translate-y-0.5 transition-transform">
                 <a
-                  href="https://github.com/MohammadHarish52"
+                  href="https://github.com/mdharish72"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Follow MohammadHarish52 on Github"
@@ -70,7 +70,7 @@ export default function Footer() {
               </button>
               <button className="p-2 rounded-full comic-border-2 bg-[#EBDDBF] comic-shadow-2 hover:-translate-y-0.5 transition-transform">
                 <a
-                  href="https://x.com/Haarish_52"
+                  href="https://x.com/Mdharish76"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Follow Haarish_52 on X"
