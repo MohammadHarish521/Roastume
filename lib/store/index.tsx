@@ -38,7 +38,7 @@ export function RoastumeProvider({ children }: { children: React.ReactNode }) {
 
   // Load resumes on mount
   useEffect(() => {
-    resumeActions.refreshResumes(1, 9);
+    resumeActions.refreshResumes(1, 15);
   }, []);
 
   // Utility functions

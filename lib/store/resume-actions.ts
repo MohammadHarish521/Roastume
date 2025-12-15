@@ -18,7 +18,7 @@ export function createResumeActions(
 ) {
   const refreshResumes = async (
     page: number = 1,
-    pageSize: number = 9,
+    pageSize: number = 15,
     searchQuery?: string
   ) => {
     try {

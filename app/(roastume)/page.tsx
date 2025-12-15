@@ -23,7 +23,7 @@ export default function Page() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showWelcome, setShowWelcome] = useState(true);
   const [page, setPage] = useState(1);
-  const pageSize = 9;
+  const pageSize = 15;
 
   // Filter resumes based on search query
   const filteredResumes = useMemo(() => {
