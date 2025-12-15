@@ -50,7 +50,7 @@ export interface ApiNotification {
 // Resume API functions
 export async function fetchResumes(
   page: number = 1,
-  pageSize: number = 9,
+  pageSize: number = 15,
   query?: string
 ): Promise<{ resumes: ApiResume[]; total: number }> {
   const params = new URLSearchParams({
